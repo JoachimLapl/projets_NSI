@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Logic Booléenne</title>
+    <style>
+        html,
+        body,
+        svg,
+        #page-content {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            background: #001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        svg {
+            height: 90%;
+            width: 90%;
+            border: 1px solid #fff;
+            background: url('data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22.2%200%201.7321%203%22%3E%3Cpath%20d%3D%22m%201.7321%2C0%20v%201%20l%20.866%2C.5%20M%200%2C1%20l%20.866%2C.5%20l%20.866%2C-.5%20M%200%2C3%20l%20.866%2C-.5%20v%20-1%20M%20.866%2C2.5%20l%20.866%2C0.5%20l%20.866%2C-.5%22%20fill%3D%22none%22%20stroke%3D%22%23fff1%22%20stroke-width%3D%22.1%22%2F%3E%3C%2Fsvg%3E') repeat;
+            background-size: 10px;
+        }
+
+        body>* {
+            height: 100%;
+        }
+
+        /* #select-operators{
+            width: 100px;
+        } */
+
+        #select-operators {
+            box-shadow: 0 0 3px 1px #fff;
+            min-width: min-content;
+            width: 0%;
+        }
+
+        #select-operators>*:not(hr, #pannelmotion, svg) {
+            width: 100%;
+            min-width: max-content;
+            text-align: left;
+            color: white;
+            background: none;
+            border: none;
+        }
+
+        #select-operators>*>.checkopen {
+            display: inline-block;
+            height: 10px;
+            width: 10px;
+            background: url('data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-13%20-15%2030%2030%22%3E%3Cpath%20d%3D%22M%20-5%2C-8.66%20L%2010%2C0%20L%20-5%2C8.66%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%223%22%2F%3E%3C%2Fsvg%3E');
+            transition: transform 500ms;
+            margin: 0 10px 0 0;
+            clip-path: circle();
+        }
+
+        #select-operators>*[isopen="true"]>.checkopen {
+            transform: rotate(90deg);
+        }
+
+
+        #select-operators>*:hover>.checkopen {
+            transform: rotate(45deg);
+        }
+
+        #pannelmotion {
+            height: 100%;
+            width: 1vw;
+            position: absolute;
+            top: 0;
+            cursor: w-resize;
+        }
+
+        hr {
+            width: 80%;
+            border: 0.1px solid #fff;
+
+        }
+
+        #operator-sheet {
+            min-width: 100px;
+            width: calc(100% - 20px) !important;
+            height: 100px;
+            margin: 0 10px;
+        }
+
+        svg *:not(text, tspan) {
+            stroke: #fff;
+        }
+
+        svg text {
+            fill: #fff;
+        }
+
+        rect {
+            fill: #f00;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="page-content">
+        <svg id="mainSVG"></svg>
+    </div>
+    <div id="select-operators">
+        <button isopen="true">
+            <div class="checkopen"></div>Operators
+        </button>
+        <svg id="operator-sheet">
+            <g>
+                <rect x=10 width=100 y=10 height=50 />
+                <text dominant-baseline="middle">AND</text>
+            </g>
+        </svg>
+        <hr>
+        <button isopen="false">
+            <div class="checkopen"></div>Input
+        </button>
+        <hr>
+        <button isopen="false">
+            <div class="checkopen"></div>Output
+        </button>
+        <div id="pannelmotion"></div>
+    </div>
+    <script>
+        const $ = s => document.querySelector(s);
+        const [pagecontent, operatorSelector, pannelmotion, mainSVG] = ['#page-content', '#select-operators', '#pannelmotion', '#mainSVG'].map($);
+
+        pannelmotion.onmousedown = ({ offsetX }) => {
+            onmousemove = ({ x }) => {
+                operatorSelector.style.width = `${100 - (x + offsetX) / innerWidth * 100}%`;
+                pagecontent.style.width = `${(x + offsetX) / innerWidth * 100}%`;
+            }
+            onmouseup = () => { onmousemove = onmouseup = () => void {}; }
+        }
+
+        [mainSVG.bx, mainSVG.by] = [0, 0];
+        mainSVG.onwheel = ({ deltaY, shiftKey }) => {
+            if (shiftKey) {
+                mainSVG.style.backgroundPositionX = `${mainSVG.bx += deltaY}px`;
+            } else {
+                mainSVG.style.backgroundPositionY = `${mainSVG.by += deltaY}px`;
+            }
+        }
+
+        const AND = ([a,b]) => [a & b], OR = ([a, b]) => [a | b], NOT = ([a]) => [a?0:1];
+
+        code_example = `([a,b,c])=>[OR(a,b), NAND(NOR(a,c),b)]`;
+
+        class Operator{
+            constructor(N_inputs,N_outputs, evalFunction){
+
+            }
+        }
+
+    </script>
+</body>
+
+</html>
