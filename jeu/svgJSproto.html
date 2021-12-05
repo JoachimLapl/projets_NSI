@@ -32,6 +32,8 @@
         <circle id="wheel1" />
         <circle id="wheel2" />
         <circle id="wheel3" />
+        <circle id="wheel4" />
+        <circle id="wheel5" />
         <line />
         <path />
     </svg>
@@ -39,8 +41,8 @@
         const $ = (s, p = document) => p.querySelector(s);
         const svg = $('svg');
         const keys = {};
-        onmousedown = ({ key }) => keys[key] = true;
-        onmouseup = ({ key }) => keys[key] = false;
+        onkeydown = ({ key }) => keys[key] = true;
+        onkeyup = ({ key }) => keys[key] = false;
         const mouseposition = { x: 0, y: 0 };
         onmousemove = ({ x, y }) => { mouseposition.x = x; mouseposition.y = y };
         Object.defineProperties(String.prototype, {
@@ -49,6 +51,18 @@
                     r = [];
                     for (let i = 0; i < this.length; i++) r.push(callback(this[i], i))
                     return r
+                }
+            }
+        })
+        Object.defineProperties(Array.prototype, {
+            last: {
+                get: function () {
+                    return this[this.length - 1]
+                }
+            },
+            first: {
+                get: function () {
+                    return this[0]
                 }
             }
         })
@@ -125,7 +139,7 @@
         }
         class Chassis {
             constructor(map) {
-                this.wheels = [0, 1, 2, 3].map(e => new Wheel(e, map));
+                this.wheels = [0, 1, 2, 3, 4, 5].map(e => new Wheel(e, map));
                 console.log(this.wheels)
                 this.wheels.forEach(e => e.update());
                 this.line = $('line', svg);
@@ -134,15 +148,27 @@
                 this.map = map;
             }
             update() {
-                const x = mouseposition.x / innerWidth * (this.map.dimensions[1] - 1) * this.map.divider;
+                // const x = mouseposition.x / innerWidth * (this.map.dimensions[1] - 1) * this.map.divider;
+                // this.wheels.forEach((e, i) => {
+                //     e.position = [x + i * 5, this.map.f(x + i * 5)]
+                // })
+                this.p[0] += (keys["ArrowLeft"] ? -1 : 0) + (keys["ArrowRight"] ? 1 : 0);
+                this.updateWheels();
+                this.line.x1.baseVal.value = this.wheels.first.position[0];
+                this.line.y1.baseVal.value = this.wheels.first.position[1] - 5;
+                this.line.x2.baseVal.value = this.wheels.last.position[0];
+                this.line.y2.baseVal.value = this.wheels.last.position[1] - 5;
+                const mp = this.midP
+                svg.setAttribute('viewBox', `${mp[0] - 50} ${mp[1] - 50} 100 100`)
+            }
+            updateWheels() {
                 this.wheels.forEach((e, i) => {
-                    e.position = [x + i * 5, this.map.f(x + i * 5)]
-                })
+                    e.position = [this.p[0] + i * 5, this.map.f(this.p[0] + i * 5)]
+                });
                 this.wheels.forEach(e => e.update());
-                this.line.x1.baseVal.value = this.wheels[0].position[0];
-                this.line.y1.baseVal.value = this.wheels[0].position[1]-5;
-                this.line.x2.baseVal.value = this.wheels[3].position[0];
-                this.line.y2.baseVal.value = this.wheels[3].position[1]-5;
+            }
+            get midP() {
+                return [(this.wheels.length - 1) * 5 + this.p[0], (Math.max(...this.wheels.map(e => e.position[1])) + Math.min(...this.wheels.map(e => e.position[1]))) / 2]
             }
         }
 
