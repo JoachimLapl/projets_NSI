@@ -139,6 +139,10 @@
                     e.position = [x + i * 5, this.map.f(x + i * 5)]
                 })
                 this.wheels.forEach(e => e.update());
+                this.line.x1.baseVal.value = this.wheels[0].position[0];
+                this.line.y1.baseVal.value = this.wheels[0].position[1]-5;
+                this.line.x2.baseVal.value = this.wheels[3].position[0];
+                this.line.y2.baseVal.value = this.wheels[3].position[1]-5;
             }
         }
 
