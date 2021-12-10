@@ -102,7 +102,8 @@
                     }
                 }
                 e.setAttribute('d', str);
-                svg.setAttribute('viewBox', `0 0 ${(this.dimensions[1] - 1) * n} ${(this.dimensions[0] - 1) * n}`)
+                svg.setAttribute('viewBox', `0 0 ${(this.dimensions[1] - 1) * n} ${(this.dimensions[0] - 1) * n}`);
+                this.offset = .5 * n + 2.5;
             }
             getY(x) {
                 for (let i in this.matrix)
@@ -111,10 +112,10 @@
             f(x) {
                 const div = x / this.divider;
                 if (x % this.divider === 0) {
-                    return this.getY(Math.floor(div)) * this.divider - 7.5;
+                    return this.getY(Math.floor(div)) * this.divider - this.offset;
                 } else {
                     const fork_x = [Math.floor(div), Math.ceil(div)];
-                    const fork_y = fork_x.map(e => this.getY(e) * this.divider - 7.5);
+                    const fork_y = fork_x.map(e => this.getY(e) * this.divider - this.offset);
                     return (div - fork_x[0]) * (fork_y[1] - fork_y[0]) + fork_y[0];
                 }
             }
@@ -168,7 +169,7 @@
                 this.wheels.forEach(e => e.update());
             }
             get midP() {
-                return [(this.wheels.length - 1) * 5 + this.p[0], (Math.max(...this.wheels.map(e => e.position[1])) + Math.min(...this.wheels.map(e => e.position[1]))) / 2]
+                return [(this.wheels.length - 1) * 5 + this.p[0], (this.wheels.map(e => e.position[1]).reduce((s, e) => s + e)) / this.wheels.length]
             }
         }
 

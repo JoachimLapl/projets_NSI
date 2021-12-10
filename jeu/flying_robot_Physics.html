@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        html,
+        body,
+        svg {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        circle {
+            r: 2;
+            stroke: #000;
+            fill: #fff;
+        }
+
+        line {
+            stroke: #000;
+        }
+
+        #orientation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+
+        #prop1,
+        #prop2 {
+            stroke: aqua;
+        }
+    </style>
+</head>
+
+<body>
+    <svg>
+        <line />
+        <line id="prop1" />
+        <line id="prop2" />
+    </svg>
+    <div id=orientation>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+    <script>
+        const $ = (s, p = document) => p.querySelector(s);
+        const svg = $('svg');
+        const orient = $('#orientation')
+        const p2 = Math.PI / 2
+        const keys = {};
+        onkeydown = ({ key }) => keys[key] = true;
+        onkeyup = ({ key }) => keys[key] = false;
+        const mouseposition = { x: innerWidth / 2, y: innerHeight / 2 }
+        onmousemove = ({ x, y }) => { mouseposition.x = x; mouseposition.y = y };
+
+        class Map {
+            constructor(height = 250, width = 250) {
+                this.height = height
+                this.width = width
+                svg.setAttribute('viewBox', `${-width / 2} ${-height / 2} ${width} ${height}`)
+            }
+        }
+
+        class Propeller {
+            constructor(chassis, pos, el) {
+                this.power = 0;
+                this.chassis = chassis;
+                this.force = [0, 0];
+                this.pos = pos;
+                this.el = el;
+            }
+            update() {
+                this.force = [
+                    Math.cos(this.chassis.orientation) * this.power,
+                    -Math.sin(this.chassis.orientation) * this.power
+                ];
+                this.nextpos = this.pos.map((e, i) => e + this.force[i])
+            }
+            display() {
+                [this.el.x1.baseVal.value,
+                this.el.y1.baseVal.value] = this.pos;
+                [this.el.x2.baseVal.value,
+                this.el.y2.baseVal.value] = this.pos.map((e, i) => e - this.force[i] * 5);
+            }
+        }
+
+        class Weight {
+            constructor(pos) {
+                this.force = [0, 1];
+                this.pos = pos;
+            }
+            update() { this.nextpos = this.pos.map((e, i) => e + this.force[i]) }
+        }
+
+        class Chassis {
+            constructor(map, r = 10) {
+                this.line = $('line', svg);
+                this.line.x1.baseVal.value = -r
+                this.line.x2.baseVal.value = r
+                this.r = r
+                this.p = [0, 0];
+                this.orientation = p2;
+                this.vector = [0, 0];
+                this.map = map;
+                this.propellers = [
+                    new Propeller(this, [-r, 0], $('#prop1', svg)),
+                    new Propeller(this, [r, 0], $('#prop2', svg))
+                ]
+                this.weight = new Weight([0, 0]);
+                this.rotateIndex = 0;
+            }
+            update() {
+                // const coef1 = 2 - mouseposition.y / innerHeight * 2
+                // const coef2 = mouseposition.x / innerWidth
+                // this.propellers[0].power = coef1 * coef2
+                // this.propellers[1].power = coef1 * (1 - coef2)
+                // console.log(keys.ArrowUp && (keys.ArrowRight || .5))
+                this.propellers[0].power = keys.ArrowUp && (keys.ArrowRight || .75) || 0;
+                this.propellers[1].power = keys.ArrowUp && (keys.ArrowLeft || .75) || 0;
+                this.propellers.forEach(p => p.update())
+                this.weight.update();
+                this.vector = this.vector.map((v, i) => v + this.propellers[0].force[i] + this.propellers[1].force[i] + this.weight.force[i])
+                this.p = [
+                    this.vector[0] * .1 + (this.propellers[0].nextpos[0] + this.propellers[1].nextpos[0] + this.weight.nextpos[0]) / 3,
+                    this.vector[1] * .1 + (this.propellers[0].nextpos[1] + this.propellers[1].nextpos[1] + this.weight.nextpos[1]) / 3
+                ]
+                const arr = [this.p, this.weight.pos, this.weight.nextpos];
+                const [a, c, b] = arr.map((e, i) => Math.hypot(e[0] - arr[(i + 1) % 3][0], e[1] - arr[(i + 1) % 3][1]));
+                this.rotateIndex += Math.asin(Math.hypot(...this.propellers[0].force) / -this.r) + Math.asin(Math.hypot(...this.propellers[1].force) / this.r)
+                this.orientation += this.rotateIndex * .1 + Math.asin(Math.hypot(...this.propellers[0].force) / -this.r) + Math.asin(Math.hypot(...this.propellers[1].force) / this.r);
+                this.line.x1.baseVal.value = this.propellers[0].pos[0] = this.p[0] - Math.sin(this.orientation) * this.r
+                this.line.y1.baseVal.value = this.propellers[0].pos[1] = this.p[1] - Math.cos(this.orientation) * this.r
+                this.line.x2.baseVal.value = this.propellers[1].pos[0] = this.p[0] + Math.sin(this.orientation) * this.r
+                this.line.y2.baseVal.value = this.propellers[1].pos[1] = this.p[1] + Math.cos(this.orientation) * this.r
+                this.weight.pos = this.p;
+                this.propellers.forEach(p => p.display())
+                this.vector = this.vector.map(e => e * .99)
+                this.rotateIndex *= .95
+            }
+        }
+
+        map = new Map()
+        chassis = new Chassis(map);
+
+        (loop = () => {
+            requestAnimationFrame(loop)
+            chassis.update()
+        })();
+    </script>
+
+</body>
+
+
+
+</html>

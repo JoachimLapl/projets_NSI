@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        html,
+        body,
+        svg {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+    <svg>
+        <path />
+        <circle r=.1 fill="#f00" />
+    </svg>
+    <script>
+        const $ = (s, p = document) => p.querySelector(s);
+        const svg = $('svg');
+        // const keys = {};
+        // onkeydown = ({ key }) => keys[key] = true;
+        // onkeyup = ({ key }) => keys[key] = false;
+        // const mouseposition = { x: 0, y: 0 };
+        // onmousemove = ({ x, y }) => { mouseposition.x = x; mouseposition.y = y };
+
+
+        function remove_doublons(t) {
+            return t.filter((e, i) => e !== t[(i - 1 + t.length) % t.length] && e !== t[(i + 1) % t.length])
+        }
+        const r = [[[0, .5], [0, 0], [.5, 0]], [[.5, 0], [1, 0], [1, .5]], [[1, .5], [1, 1], [.5, 1]], [[.5, 1], [0, 1], [0, .5]]];
+        const tiles = [];
+        //  init tiles
+        [0, 1].forEach(i => {
+            [0, 1].forEach(j => {
+                [0, 1].forEach(k => {
+                    [0, 1].forEach(l => {
+                        tiles[i * 8 + j * 4 + k * 2 + l] = remove_doublons(
+                            (i ? r[0] : []).concat(j ? r[1] : []).concat(k ? r[2] : []).concat(l ? r[3] : [])
+                        )
+                    })
+                })
+            })
+        })
+
+        console.log(tiles)
+
+        const mat = /*[
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 1, 1, 0, 0, 0],
+            [0, 1, 1, 0, 1, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 0, 0, 0, 1],
+            [1, 1, 0, 0, 0, 0, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1, 1, 1],
+        ]*/new Array(100).fill(0).map(() => new Array(100).fill(0));
+        const mat_d = [mat.length, mat[0].length];
+        const l = 1;
+        const path = $('path', svg);
+
+        function draw_mat() {
+            var str = '';
+            const minX = Math.floor(deplacement[0] / l) * l
+            const minY = Math.floor(deplacement[1] / l) * l
+            const maxX = Math.ceil((deplacement[0] + 100) / l) * l
+            const maxY = Math.ceil((deplacement[1] + 100 * coef) / l) * l
+            for (let i = Math.max(minY, 0); i < Math.min(maxY, mat_d[0] - 1); i++)
+                for (let j = Math.max(minX, 0); j < Math.min(maxX, mat_d[1] - 1); j++) {
+                    [a, b, c, d] = [mat[i][j], mat[i][j + 1], mat[i + 1][j + 1], mat[i + 1][j]];
+                    if (a || b || c || d) {
+                        var run = 1;
+                        for (let t of tiles[a * 8 + b * 4 + c * 2 + d]) {
+                            str += `${run ? (run = 0, ' M') : ' L'} ${(j + deplacement[0] + t[0]) * l},${(i + deplacement[1] + t[1]) * l}`;
+                        }
+                    }
+                }
+            path.setAttribute('d', str);
+        }
+
+        const deplacement = [0, 0];
+        var coef = innerHeight / innerWidth;
+        var zoom = 100;
+        svg.setAttribute('viewBox', `${deplacement.join(' ')} ${zoom} ${zoom * coef}`)
+        onresize = () => {
+            coef = innerHeight / innerWidth;
+            svg.setAttribute('viewBox', `${deplacement.join(' ')} ${zoom} ${zoom * coef}`)
+        }
+
+        function viewPointOnMap(x, y) {
+            ex = x / innerWidth * zoom - deplacement[0];
+            ey = y / innerWidth * zoom - deplacement[1];
+            return [Math.round(ex + Math.round(ex / l % 1) * l - ex % l), Math.round(ey + Math.round(ey / l % 1) * l - ey % l)]
+        }
+
+        const circle = $('circle', svg)
+        onmousedown = ({ x, y, ctrlKey }) => {
+            [x, y] = viewPointOnMap(x, y);
+            mat[y / l][x / l] = Number(ctrlKey);
+            circle.cx.baseVal.value = x + deplacement[0];
+            circle.cy.baseVal.value = y + deplacement[1];
+            draw_mat();
+            onmousemove = ({ x, y, ctrlKey }) => {
+                [x, y] = viewPointOnMap(x, y);
+                mat[y / l][x / l] = Number(ctrlKey);
+                circle.cx.baseVal.value = x + deplacement[0];
+                circle.cy.baseVal.value = y + deplacement[1];
+                draw_mat();
+            }
+            onmouseup = () => { onmousemove = onmouseup = () => void {} };
+        }
+        onwheel = ({ shiftKey, deltaY }) => {
+            if (shiftKey) {
+                deplacement[0] += Math.sign(deltaY)
+                draw_mat()
+            }
+        }
+
+        draw_mat();
+    </script>
+</body>
+
+</html>
