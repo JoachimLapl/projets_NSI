@@ -113,7 +113,7 @@
                     new Propeller(this, [-r, 0], $('#prop1', svg)),
                     new Propeller(this, [r, 0], $('#prop2', svg))
                 ]
-                this.weight = new Weight([0, 0]);
+                this.weight = new Weight([50, 0]);
                 this.rotateIndex = 0;
             }
             update() {
@@ -139,7 +139,7 @@
                 this.line.y1.baseVal.value = this.propellers[0].pos[1] = this.p[1] - Math.cos(this.orientation) * this.r
                 this.line.x2.baseVal.value = this.propellers[1].pos[0] = this.p[0] + Math.sin(this.orientation) * this.r
                 this.line.y2.baseVal.value = this.propellers[1].pos[1] = this.p[1] + Math.cos(this.orientation) * this.r
-                this.weight.pos = this.p;
+                this.weight.pos = [this.p[0] + Math.sin(this.orientation)*50, this.p[1]+ Math.cos(this.orientation) *50];
                 this.propellers.forEach(p => p.display())
                 this.vector = this.vector.map(e => e * .99)
                 this.rotateIndex *= .95
