@@ -239,7 +239,7 @@ class Wheel {
             for (let cas of cases) {
                 console.groupCollapsed(cas)
                 var murs = this.map.readMatrixCase(cas, this.r)
-                // console.log(murs)
+                console.log(murs)
                 murs = murs.filter(mur => Vector.isOpposite(vector, mur.vector))
                 // console.log(murs)
                 murs.forEach(mur => {
