@@ -283,7 +283,7 @@ class Wheel {
             Vector.draw(vector, Point.translate(R, [-50, -50]), this.map.svg, "#00f", .4)
             // this.map.svg.insertAdjacentHTML('beforeend', `<line x1=${R[0] - 50} y1=${R[1] - 50} x2=${R[0] - 50 + vector[0]} y2=${R[1] - 50 + vector[1]} style="stroke:#00f;stroke-width:.4" />`)
             // changer la varibale`vector` en fonction du vecteur du`mur` et de la distance où se trouve le point issu de la translation de`point` par le vecteur`vector` partant du point`nouveau_point`
-            point = Vector.multiply(R, this.map.l);
+            point = R;
             this.map.drawCircle(point)
             console.groupEnd()
             index++;
