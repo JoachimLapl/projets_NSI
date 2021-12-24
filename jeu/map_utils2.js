@@ -242,7 +242,7 @@ class Wheel {
                 console.log(murs)
                 murs = murs.filter(mur => Vector.isOpposite(vector, mur.vector))
                 murs = murs.map(mur=>mur.line.translate(...cas))
-                // console.log(murs)
+                console.log(murs)
                 murs.forEach(mur => {
                     // console.log(Vector.add(Vector.multiply(mur.p, this.map.l),[-50,-50]),)
                     this.map.drawLineLine(mur.line, cas)
