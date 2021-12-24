@@ -229,7 +229,7 @@ class Wheel {
                 console.groupCollapsed(cas)
                 var murs = this.map.readMatrixCase(cas, this.r)
                 console.log(murs)
-                murs = murs.filter(mur => vector.isOpposite(mur.vector))
+                murs = murs.filter(mur => Vector.isOpposite(vector, mur.vector))
                 console.log(murs)
                 murs.forEach(mur => {
                     // console.log(Vector.add(Vector.multiply(mur.p, this.map.l),[-50,-50]),)
@@ -293,4 +293,4 @@ class Wheel {
     }
 }
 
-export {Wall, MAP, Wheel}
+export { Wall, MAP, Wheel }
