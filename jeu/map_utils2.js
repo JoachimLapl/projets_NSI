@@ -235,7 +235,8 @@ class Wheel {
                 console.log(murs)
                 murs.forEach(mur => {
                     // console.log(Vector.add(Vector.multiply(mur.p, this.map.l),[-50,-50]),)
-                    new Droite.Point_Vector(Vector.add(Vector.multiply(mur.p, this.map.l), [0, 0]), [-mur.vector[1], mur.vector[0]]).draw(this.map.svg, [-50, -50, 50, 50])
+                    this.map.drawLine(mur.line)
+                    // new Droite.Point_Vector(Vector.add(Vector.multiply(mur.p, this.map.l), [0, 0]), [-mur.vector[1], mur.vector[0]]).draw(this.map.svg, [-50, -50, 50, 50])
                 })
 
                 murs = murs.map(mur => [mur, droite.intersection(mur.line)])
