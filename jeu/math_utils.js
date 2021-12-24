@@ -1,10 +1,17 @@
 // @ts-check
 
+function sumArray(array, callback = x => x) {
+    var S = 0;
+    for (let i of array)
+        S += callback(i);
+    return S
+}
+
 class Vector {
     static add(v, u) { return v.map((e, i) => e + u[i]) }
     static subtract(v, u) { return v.map((e, i) => e - u[i]) }
     static multiply(v, n) { return v.map(e => e * n) }
-    static isOpposite(v, u) { return new Array(this.length).fill(0).map((_, i) => (this[i] + v[i]) ** 2).reduce((s, p) => s + p) < this[this instanceof Vector ? 'array' : 'map'](e => e ** 2).reduce((s, p) => s + p) + v[v instanceof Vector ? 'array' : 'map'](e => e ** 2).reduce((s, p) => s + p) }
+    static isOpposite(v, u) { return sumArray(Vector.add(v, u), x => x ** 2) < sumArray(v, x => x ** 2) + sumArray(u, x => x ** 2) }
     static getNorm = v => Math.hypot(v[0], v[1]);
     static setToNorm = (v, s) => (s /= Vector.getNorm(v), v.map(e => e * s));
     static draw(v, p, svgElement, stroke = "#000", strokeWidth = 1) { svgElement.insertAdjacentHTML('beforeend', `<path d="m ${p[0]},${p[1]} l ${v[0]},${v[1]}" stroke=${stroke} stroke-width=${strokeWidth} marker-end=url(#arrow) />`) }
