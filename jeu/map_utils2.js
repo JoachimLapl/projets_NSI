@@ -103,12 +103,8 @@ class MAP {
                     if (!bl.every(e => e !== k)) {
                         const [a, b, c, d] = bl.map(e => Number(e && e <= k));
                         const path = MAP.marching_squares[a * 8 + b * 4 + c * 2 + d];
-                        console.log(path)
-                        console.log(this.l, this.relative)
-
                         path.forEach(points => {
                             points.forEach((point, index) => {
-                                console.log(point, index)
                                 strs[k - 1] += (index === 0 ? ' M ' : ' L ') + ((point[0] + x) * this.l - this.relative[0]) + ',' + ((point[1] + y) * this.l - this.relative[1])
                             })
                         })
