@@ -73,7 +73,7 @@ class MAP {
     static types = [
         // [slippery: number]
         [0, '#888'], // basic groud: not slippery at all, grey
-        [.75, '#ff0']   // ice: very slippery, yellow (just a test)
+        [.75, '#0ff']   // ice: very slippery, cyan (just a test)
     ];
     constructor(string, l, svg, view = [[-50, -50], [50, 50]]) {
         this.l = l
