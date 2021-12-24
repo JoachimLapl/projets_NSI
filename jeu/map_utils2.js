@@ -242,7 +242,7 @@ class Wheel {
                 console.log(murs)
 
                 murs.forEach(mur => {
-                    mur[1].draw(this.map.svg)
+                    Point.draw(mur[1], this.map.svg)
                 })
                 murs = murs.filter(mur => this.map.withinCase(mur[1], cas))
                 console.log(murs)
