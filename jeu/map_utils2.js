@@ -224,7 +224,8 @@ class Wheel {
         var Size = size;
         const map = this.map;
         var index = 0;
-        while (true && index < 4) {
+        while (true && index < 3) {
+            console.groupCollapsed(index.toString());
             console.log(point, vector)
             const cases = map.vectorCases(point, vector).filter(c => this.map.withinMap(c));
             const droite = new Droite.Point_Vector(Vector.multiply(point, 1 / this.map.l), vector);
@@ -233,9 +234,9 @@ class Wheel {
             for (let cas of cases) {
                 console.groupCollapsed(cas)
                 var murs = this.map.readMatrixCase(cas, this.r)
-                console.log(murs)
+                // console.log(murs)
                 murs = murs.filter(mur => Vector.isOpposite(vector, mur.vector))
-                console.log(murs)
+                // console.log(murs)
                 murs.forEach(mur => {
                     // console.log(Vector.add(Vector.multiply(mur.p, this.map.l),[-50,-50]),)
                     this.map.drawLineLine(mur.line)
@@ -243,7 +244,7 @@ class Wheel {
                 })
 
                 murs = murs.map(mur => [mur, droite.intersection(mur.line)])
-                console.log(murs)
+                // console.log(murs)
 
                 murs.forEach(mur => {
                     Point.draw(mur[1], this.map.svg)
@@ -252,13 +253,12 @@ class Wheel {
                 console.log(murs)
                 murs = murs.map(mur => [...mur, Point.distance(Vector.multiply(point, 1 / this.map.l), mur[1])])
                 murs = murs.sort((mur1, mur2) => mur1[2] - mur2[2]);
-                console.log(murs)
+                // console.log(murs)
                 console.groupEnd()
                 if (murs.length === 1) {
                     mur = murs[0];
                     break;
                 }
-                index++;
             }
             console.log('mur', mur)
             if (!mur) break;
@@ -280,10 +280,12 @@ class Wheel {
             size = (size - PR) * sin;
             console.log('size', size)
             vector = Vector.setToNorm(v_QR, size);
-            Vector.draw(vector, Point.translate(R,[-50,-50]), this.map.svg, "#00f", .4)
+            Vector.draw(vector, Point.translate(R, [-50, -50]), this.map.svg, "#00f", .4)
             // this.map.svg.insertAdjacentHTML('beforeend', `<line x1=${R[0] - 50} y1=${R[1] - 50} x2=${R[0] - 50 + vector[0]} y2=${R[1] - 50 + vector[1]} style="stroke:#00f;stroke-width:.4" />`)
             // changer la varibale`vector` en fonction du vecteur du`mur` et de la distance où se trouve le point issu de la translation de`point` par le vecteur`vector` partant du point`nouveau_point`
             point = R;
+            console.groupEnd()
+            index++;
             // break; // to be removed later
             debugger;
         }
