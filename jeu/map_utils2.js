@@ -234,7 +234,7 @@ class Wheel {
             console.log(point, vector)
             const cases = map.vectorCases(point, vector).filter(c => this.map.withinMap(c));
             const droite = new Droite.Point_Vector(Vector.multiply(point, 1 / this.map.l), vector);
-            var mur;
+            var mur = undefined;
             console.log(cases)
             for (let cas of cases) {
                 console.groupCollapsed(cas)
