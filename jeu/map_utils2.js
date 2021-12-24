@@ -208,7 +208,7 @@ class MAP {
         new Droite(
             l[0],
             l[1],
-            l[2] * this.l + (t[0] * this.l*2 - this.relative[0]) * l[1] + (t[1] * this.l*2 - this.relative[1]) * l[0]
+            l[2] * this.l + (t[0] * this.l * 2 - this.relative[0]) * l[1] + (t[1] * this.l * 2 - this.relative[1]) * l[0]
         ).draw(this.svg, [...this.view[0], ...this.view[1]])
     }
 }
@@ -224,7 +224,7 @@ class Wheel {
     update() {
         var point = this.pos;
         var vector = this.vector;
-        Vector.draw(vector, this.map.svg)
+        Vector.draw(vector, point, this.map.svg)
         var size = Vector.getNorm(this.vector);
         var Size = size;
         const map = this.map;
