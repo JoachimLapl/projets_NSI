@@ -208,7 +208,7 @@ class MAP {
         new Droite(
             l[0],
             l[1],
-            l[2] * this.l + (t[0] * this.l * 2 - this.relative[0]) * l[1] + (t[1] * this.l * 2 - this.relative[1]) * l[0]
+            l[2] * this.l + (t[0] * this.l - this.relative[0]) * l[1] + (t[1] * this.l - this.relative[1]) * l[0]
         ).draw(this.svg, [...this.view[0], ...this.view[1]])
     }
 }

@@ -13,5 +13,5 @@ const drt = new Droite.Point_Vector(wheel.pos, wheel.vector)
 map.addWheel(wheel)
 map.draw();
 wheel.display();
-map.drawLineLine(drt, wheel.pos)
+map.drawLineLine(drt, Vector.multiply(wheel.pos,1/map.l))
 wheel.update()
