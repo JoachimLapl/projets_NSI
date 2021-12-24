@@ -155,7 +155,7 @@ class MAP {
             return vector[0] < 0 ? r.reverse() : r
         } else {
             if (vector[1] < 0) { [p1, p2] = [p2, p1] }
-            console.log(p1, p2)
+            // console.log(p1, p2)
             var offsetY = p1[1];
             const index = p1[0] > p2[0] ? -1 : 1;
             for (let x = p1[0]; x !== p2[0] + index; x += index) {
@@ -173,14 +173,14 @@ class MAP {
     readMatrixCase(point, radius) {
         radius /= this.l
         const i = point[1], j = point[0];
-        console.log(point, i, j, radius);
+        // console.log(point, i, j, radius);
         const bl = [this.matrix[i][j], this.matrix[i][j + 1], this.matrix[i + 1][j + 1], this.matrix[i + 1][j]];
         const walls = [];
         for (let k = 1; k < MAP.types.length + 1; k++) {
             if (!bl.every(e => e !== k)) {
                 const [a, b, c, d] = bl.map(e => Number(e && e <= k));
-                console.log(bl, [a, b, c, d], a * 8 + b * 4 + c * 2 + d)
-                console.log(MAP.WALL[radius], MAP.WALL[radius][a * 8 + b * 4 + c * 2 + d])
+                // console.log(bl, [a, b, c, d], a * 8 + b * 4 + c * 2 + d)
+                // console.log(MAP.WALL[radius], MAP.WALL[radius][a * 8 + b * 4 + c * 2 + d])
                 const addwalls = MAP.WALL[radius][a * 8 + b * 4 + c * 2 + d];
                 addwalls.forEach(wall => {
                     wall = wall.clone();
@@ -204,7 +204,7 @@ class MAP {
     drawLine([x1, y1], [x2, y2], w, c = "#000") {
         this.svg.insertAdjacentHTML('beforeend', `<line x1=${x1 - this.relative[0]} x2=${x2 - this.relative[0]} y1=${y1 - this.relative[1]} y2=${y2 - this.relative[1]} stroke-width=${w} stroke=${c} />`)
     }
-    drawLineLine(l, w, c = "#000") {
+    drawLineLine(l) {
         new Droite(l[0], l[1], l[2] * this.l - this.relative[0] * l[1] - this.relative[1] * l[0]).draw(this.svg, [...this.view[0], ...this.view[1]])
     }
 }
@@ -260,9 +260,8 @@ class Wheel {
                     break;
                 }
             }
-            console.log('mur', mur)
             if (!mur) break;
-            console.log(mur)
+            console.log('mur', mur)
             const R = Vector.multiply(mur[1], this.map.l);
             const Q = Vector.multiply(mur[0].line.closest(point), this.map.l);
             const PR = mur[2] * this.map.l;//Point.distance(point, R);
