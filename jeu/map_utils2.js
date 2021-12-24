@@ -224,6 +224,7 @@ class Wheel {
     update() {
         var point = this.pos;
         var vector = this.vector;
+        Vector.draw(vector, this.map.svg)
         var size = Vector.getNorm(this.vector);
         var Size = size;
         const map = this.map;
