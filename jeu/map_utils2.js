@@ -114,7 +114,7 @@ class MAP {
         }
         console.log(strs)
         strs.forEach((str, i) => {
-            this.svg.innerHTML += `<path d="${str}" fill="${MAP.types[i][1]}" />`;
+            this.svg.innerHTML = `<path d="${str}" fill="${MAP.types[i][1]}" />` + this.svg.innerHTML;
         })
     }
     findPointCase(p) {
