@@ -291,3 +291,5 @@ class Wheel {
         this.map?.drawLine?.(this.pos, Vector.add(this.pos, this.vector), this.r / 10, "#ff0")
     }
 }
+
+export {Wall, MAP, Wheel}
