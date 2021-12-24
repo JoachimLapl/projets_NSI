@@ -204,6 +204,9 @@ class MAP {
     drawLine([x1, y1], [x2, y2], w, c = "#000") {
         this.svg.insertAdjacentHTML('beforeend', `<line x1=${x1 - this.relative[0]} x2=${x2 - this.relative[0]} y1=${y1 - this.relative[1]} y2=${y2 - this.relative[1]} stroke-width=${w} stroke=${c} />`)
     }
+    drawLineLine(l, w, c = "#000") {
+        new Droite(l[0], l[1], l[2] * this.l - this.relative[0] * l[1] - this.relative[1] * l[0]).draw(this.svg, [...this.view[0], ...this.view[1]])
+    }
 }
 
 class Wheel {
@@ -235,7 +238,7 @@ class Wheel {
                 console.log(murs)
                 murs.forEach(mur => {
                     // console.log(Vector.add(Vector.multiply(mur.p, this.map.l),[-50,-50]),)
-                    this.map.drawLine(mur.line)
+                    this.map.drawLineLine(mur.line)
                     // new Droite.Point_Vector(Vector.add(Vector.multiply(mur.p, this.map.l), [0, 0]), [-mur.vector[1], mur.vector[0]]).draw(this.map.svg, [-50, -50, 50, 50])
                 })
 
