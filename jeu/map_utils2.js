@@ -205,8 +205,11 @@ class MAP {
         this.svg.insertAdjacentHTML('beforeend', `<line x1=${x1 - this.relative[0]} x2=${x2 - this.relative[0]} y1=${y1 - this.relative[1]} y2=${y2 - this.relative[1]} stroke-width=${w} stroke=${c} />`)
     }
     drawLineLine(l, t = [0, 0]) {
-        console.log(t)
-        new Droite(l[0], l[1], l[2] * this.l + (t[0] * this.l - this.relative[0]) * l[1] + (t[1] * this.l - this.relative[1]) * l[0]).draw(this.svg, [...this.view[0], ...this.view[1]])
+        new Droite(
+            l[0],
+            l[1],
+            l[2] * this.l + (-t[0] * this.l - this.relative[0]) * l[1] + (-t[1] * this.l - this.relative[1]) * l[0]
+        ).draw(this.svg, [...this.view[0], ...this.view[1]])
     }
 }
 
