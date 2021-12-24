@@ -131,10 +131,10 @@
                     this.vector[0] * .1 + (this.propellers[0].nextpos[0] + this.propellers[1].nextpos[0] + this.weight.nextpos[0]) / 3,
                     this.vector[1] * .1 + (this.propellers[0].nextpos[1] + this.propellers[1].nextpos[1] + this.weight.nextpos[1]) / 3
                 ]
-                const arr = [this.p, this.weight.pos, this.weight.nextpos];
-                const [a, c, b] = arr.map((e, i) => Math.hypot(e[0] - arr[(i + 1) % 3][0], e[1] - arr[(i + 1) % 3][1]));
-                this.rotateIndex += Math.asin(Math.hypot(...this.propellers[0].force) / -this.r) + Math.asin(Math.hypot(...this.propellers[1].force) / this.r)
-                this.orientation += this.rotateIndex * .1 + Math.asin(Math.hypot(...this.propellers[0].force) / -this.r) + Math.asin(Math.hypot(...this.propellers[1].force) / this.r);
+                // const arr = [this.p, this.weight.pos, this.weight.nextpos];
+                // const [a, c, b] = arr.map((e, i) => Math.hypot(e[0] - arr[(i + 1) % 3][0], e[1] - arr[(i + 1) % 3][1]));
+                this.rotateIndex += Math.asin(this.propellers[0].power / -this.r) + Math.asin(this.propellers[1].power / this.r);
+                this.orientation += this.rotateIndex * .1 + Math.asin(this.propellers[0].power / -this.r) + Math.asin(this.propellers[1].power / this.r);
                 this.line.x1.baseVal.value = this.propellers[0].pos[0] = this.p[0] - Math.sin(this.orientation) * this.r
                 this.line.y1.baseVal.value = this.propellers[0].pos[1] = this.p[1] - Math.cos(this.orientation) * this.r
                 this.line.x2.baseVal.value = this.propellers[1].pos[0] = this.p[0] + Math.sin(this.orientation) * this.r

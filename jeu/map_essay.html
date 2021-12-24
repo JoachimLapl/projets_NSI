@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        div {
+            display: grid;
+            grid-template-columns: auto auto auto auto;
+            width: min-content;
+        }
+
+        svg {
+            width: 25vmin;
+            height: 25vmin;
+        }
+
+        line {
+            stroke: #000;
+            stroke-width: .01;
+        }
+    </style>
+</head>
+
+<body>
+    <div></div>
+    <svg></svg>
+    <script src="map_utils.js"></script>
+    <script>
+        const svg = document.querySelector('svg')
+        const svgs = [];
+        const div = document.querySelector('div')
+        for (let i = 0; i < 4; i++) {
+            svgs[i] = []
+            for (let j = 0; j < 4; j++) {
+                div.insertAdjacentHTML('beforeend', `<svg id="svg${i}${j}"></svg>`)
+                // const svg = document.createElement('https://http://www.w3.org/2000/svg', 'svg');
+                const svg = div.querySelector('#svg' + i + j)
+                svgs[i][j] = svg;
+                svg.setAttribute('viewBox', '0 0 1 1')
+                svg.insertAdjacentHTML('beforeend', '<rect width=1 height=1 fill=none stroke=#000 stroke-width=.01 />')
+                // document.body.appendChild(svg)
+            }
+        }
+        function draw(r) {
+            const m = MAP.add_WALL(r);
+            m.forEach((walls, i) => {
+                const e = svgs[Math.floor(i / 4)][i % 4];
+                walls.forEach(wall => {
+                    wall.line.draw(e)
+                })
+                e.insertAdjacentHTML('beforeend', `<circle cx=0 cy=0 r=.05 fill=#${Math.floor(i / 8) ? 'f' : '0'}00 />`)
+                e.insertAdjacentHTML('beforeend', `<circle cx=1 cy=0 r=.05 fill=#${Math.floor(i / 4) % 2 ? 'f' : '0'}00 />`)
+                e.insertAdjacentHTML('beforeend', `<circle cx=1 cy=1 r=.05 fill=#${Math.floor(i / 2) % 2 ? 'f' : '0'}00 />`)
+                e.insertAdjacentHTML('beforeend', `<circle cx=0 cy=1 r=.05 fill=#${i % 2 ? 'f' : '0'}00 />`)
+            });
+        }
+
+        // const map = new MAP(new Array(100).fill(0).map(e=>new Array(100).fill(0).map(e=>Number(Math.random()>.5)).join('')).join(','), 5, svg)
+        // const map = new MAP('00000000000,00001010011,00000000000,01001001001,00001010011,00000000000,10010010010,00001010011,00000000000,11011011011,00001010011,',5,svg)
+        // const map = new MAP('00000000000,00001010011,00000000000,01001001001,00001010011,00000000000,10010010010,00001010011,00000000000,11011011011,00001010011,',5,svg)
+        map.draw();
+    </script>
+
+</body>
+
+
+
+</html>
