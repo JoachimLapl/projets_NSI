@@ -34,3 +34,11 @@ drt4.homothetia(3)
 drt2.draw(map.svg, [-50, -50, 50, 50])
 drt3.draw(map.svg, [-50, -50, 50, 50])
 drt4.draw(map.svg, [-50, -50, 50, 50])
+
+const drt5 = MAP.WALL[.25][2].line
+const drt6 = MAP.WALL[.25][7].line
+
+drt5.translate(0,0)
+drt6.translate(0,1)
+
+console.log(drt5,drt6)
