@@ -22,9 +22,9 @@ const drt4 = new Droite.Point_Vector([0, 0], [0, 1])
 // map.drawLineLine(drt2)
 // map.drawLineLine(drt3)
 // map.drawLineLine(drt4)
-drt2.translate(10,10)
-drt3.translate(10,10)
-drt4.translate(10,10)
+drt2.translate(10, 10)
+drt3.translate(10, 10)
+drt4.translate(10, 10)
 drt2.draw(map.svg, [-50, -50, 50, 50])
 drt3.draw(map.svg, [-50, -50, 50, 50])
 drt4.draw(map.svg, [-50, -50, 50, 50])
@@ -38,8 +38,13 @@ drt4.draw(map.svg, [-50, -50, 50, 50])
 const drt5 = MAP.WALL[.25][2][0].line
 const drt6 = MAP.WALL[.25][7][0].line
 
-console.log(drt5[2],drt6[2]);
-drt5.translate(0,0)
-drt6.translate(0,1)
+drt5.draw(map.svg)
+drt6.draw(map.svg)
 
-console.log(drt5,drt6)
+console.log(drt5[2], drt6[2]);
+drt5.translate(0, 0)
+drt6.translate(0, 1)
+
+drt6.draw(map.svg, [1, 1, 2, 2])
+
+console.log(drt5, drt6)
