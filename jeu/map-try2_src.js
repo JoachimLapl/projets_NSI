@@ -41,8 +41,8 @@ const drt6 = MAP.WALL[.25][7][0].line
 // drt5.homothetia(map.l)
 // drt6.homothetia(map.l)
 
-drt5.draw(map.svg, [-50, -50, 50, 50])
-drt6.draw(map.svg, [-50, -50, 50, 50])
+drt5.draw(map.svg, [-50, -50, 50, 50], '#00f')
+drt6.draw(map.svg, [-50, -50, 50, 50], '#f00')
 
 console.log(drt5[2], drt6[2]);
 drt5.translate(0, 0)
