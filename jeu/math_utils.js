@@ -63,8 +63,15 @@ class Droite {
             this.intersection([0, -1, view[2]]),
             this.intersection([1, 0, -view[3]])
         ].filter(e => e && e[0] >= view[0] && e[1] >= view[1] && e[0] <= view[2] && e[1] <= view[3]);
-        console.log(i)
-        i.length && svgElement.insertAdjacentHTML('beforeend', `<line x1=${i[0][0]} y1=${i[0][1]} x2=${i[1][0]} y2=${i[1][1]} />`)
+        const d = i;
+        if (i.length > 2) {
+            for (let j = i.length - 1; j > -1; j--)
+                for (let k = j; k > -1; k--)
+                    if (i[j][0] === i[k][0] && i[j][1] === i[k][1])
+                        delete i[j]
+        }
+        console.log(d)
+        i.length === 2 && svgElement.insertAdjacentHTML('beforeend', `<line x1=${i[0][0]} y1=${i[0][1]} x2=${i[1][0]} y2=${i[1][1]} />`)
     }
 }
 
