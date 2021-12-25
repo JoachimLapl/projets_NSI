@@ -22,6 +22,7 @@ const drt4 = new Droite.Point_Vector([0, 0], [0, 1])
 map.drawLineLine(drt2)
 map.drawLineLine(drt3)
 map.drawLineLine(drt4)
+debugger
 drt2.draw(map.svg, [-50,-50,50,50])
 drt3.draw(map.svg, [-50,-50,50,50])
 drt4.draw(map.svg, [-50,-50,50,50])
