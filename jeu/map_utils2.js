@@ -184,6 +184,7 @@ class MAP {
                 const addwalls = MAP.WALL[radius][a * 8 + b * 4 + c * 2 + d];
                 addwalls.forEach(wall => {
                     wall = wall.clone();
+                    wall.line = new Droite(wall.line[0], wall.line[1], wall.line[2]);
                     wall.line.translate(i, j);
                     wall.type = k - 1;
                     walls.push(wall);
