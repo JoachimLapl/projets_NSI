@@ -9,7 +9,7 @@ const svg = document.querySelector('svg')
 const map = new MAP('00000,20000,12000,11011,11111', 20, svg);
 const wheel = new Wheel([50, 50], 5);
 wheel.vector = [0, 45]
-const drt = new Droite.Point_Vector(wheel.pos, wheel.vector)
+const drt = new Droite.Point_Vector(Vector.multiply(wheel.pos, 1 / map.l), wheel.vector)
 map.addWheel(wheel)
 map.draw();
 wheel.display();
