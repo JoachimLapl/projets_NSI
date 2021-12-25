@@ -13,7 +13,7 @@ const drt = new Droite.Point_Vector(Vector.multiply(wheel.pos, 1 / map.l), wheel
 map.addWheel(wheel)
 map.draw();
 wheel.display();
-drt.homothetia(1 / map.l)
+// drt.homothetia(1 / map.l)
 map.drawLineLine(drt)
 wheel.update()
 // const drt2 = new Droite.Point_Vector([0, 0], [1, 1])

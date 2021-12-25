@@ -88,7 +88,7 @@ class MAP {
         svg.setAttribute('viewBox', `${this.view[0][0]} ${this.view[0][1]} ${this.view[1][0] - this.view[0][0]} ${this.view[1][1] - this.view[0][1]}`)
     }
     addWheel(wheel) {
-        MAP.add_WALL(wheel.r / this.l);
+        console.log(MAP.add_WALL(wheel.r / this.l));
         wheel.map = this;
         this.wheels.push(wheel)
     }
