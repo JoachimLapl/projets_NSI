@@ -51,3 +51,5 @@ drt6.translate(0, 1)
 drt6.draw(map.svg, [-50, -50, 50, 50], '#0f0')
 
 console.log(drt5, drt6)
+
+export { Vector, Point, Droite, Wall, MAP, Wheel, map, wheel, drt, drt5, drt6 }
