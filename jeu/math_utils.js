@@ -69,8 +69,8 @@ class Droite {
                     return false
             return true
         });
-        console.log(d, i.length)
-        i.length && svgElement.insertAdjacentHTML('beforeend', `<line x1=${i[0][0]} y1=${i[0][1]} x2=${i[1][0]} y2=${i[1][1]} />`)
+        console.log(d, d.length)
+        d.length && svgElement.insertAdjacentHTML('beforeend', `<line x1=${d[0][0]} y1=${d[0][1]} x2=${d[1][0]} y2=${d[1][1]} />`)
     }
 }
 
