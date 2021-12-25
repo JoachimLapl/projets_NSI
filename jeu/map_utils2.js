@@ -247,7 +247,7 @@ class Wheel {
                 murs.forEach(mur => {
                     // console.log(Vector.add(Vector.multiply(mur.p, this.map.l),[-50,-50]),)
                     this.map.drawLineLine(mur.line)
-                    mur.line.draw(this.map.svg, [-50,-50,50,50])
+                    mur.line.draw(this.map.svg, [-50, -50, 50, 50])
                     // new Droite.Point_Vector(Vector.add(Vector.multiply(mur.p, this.map.l), [0, 0]), [-mur.vector[1], mur.vector[0]]).draw(this.map.svg, [-50, -50, 50, 50])
                 })
 
@@ -268,7 +268,10 @@ class Wheel {
                     break;
                 }
             }
-            if (!mur) break;
+            if (!mur) {
+                console.groupEnd()
+                break;
+            }
             console.log('mur', mur)
             const R = Vector.multiply(mur[1], this.map.l);
             const Q = Vector.multiply(mur[0].line.closest(point), this.map.l);
