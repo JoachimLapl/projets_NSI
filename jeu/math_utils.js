@@ -56,7 +56,7 @@ class Droite {
     }
     translate(right = 0, down = 0) { this[2] -= right * this[0] + down * this[1] }
     homothetia(k) { this[2] *= k }
-    draw(svgElement, view = [0, 0, 1, 1]) {
+    draw(svgElement, view = [0, 0, 1, 1], color = '#ff0') {
         const i = [
             this.intersection([0, -1, view[0]]),
             this.intersection([1, 0, -view[1]]),
@@ -70,7 +70,7 @@ class Droite {
             return true
         });
         console.log(d, d.length)
-        d.length && svgElement.insertAdjacentHTML('beforeend', `<line x1=${d[0][0]} y1=${d[0][1]} x2=${d[1][0]} y2=${d[1][1]} />`)
+        d.length && svgElement.insertAdjacentHTML('beforeend', `<line x1=${d[0][0]} y1=${d[0][1]} x2=${d[1][0]} y2=${d[1][1]} stroke="${color}" />`)
     }
 }
 

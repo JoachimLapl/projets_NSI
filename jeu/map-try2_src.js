@@ -46,8 +46,8 @@ drt6.draw(map.svg, [-50, -50, 50, 50])
 
 console.log(drt5[2], drt6[2]);
 drt5.translate(0, 0)
-drt6.translate(0, map.l)
+drt6.translate(0, 1)
 
-drt6.draw(map.svg, [-50, -50, 50, 50])
+drt6.draw(map.svg, [-50, -50, 50, 50], '#0f0')
 
 console.log(drt5, drt6)
