@@ -63,7 +63,7 @@ class Droite {
             this.intersection([0, -1, view[2]]),
             this.intersection([1, 0, -view[3]])
         ].filter(e => e && e[0] >= view[0] && e[1] >= view[1] && e[0] <= view[2] && e[1] <= view[3]);
-        const d = i;
+        const d = i.filter((e, j) => j === i.indexOf(e));
         console.log(d)
         if (i.length > 2) {
             for (let j = i.length - 1; j > -1; j--)
