@@ -38,8 +38,8 @@ wheel.update()
 const drt5 = MAP.WALL[.25][2][0].line
 const drt6 = MAP.WALL[.25][7][0].line
 
-drt5.homothetia(map.l)
-drt6.homothetia(map.l)
+// drt5.homothetia(map.l)
+// drt6.homothetia(map.l)
 
 drt5.draw(map.svg, [-50, -50, 50, 50])
 drt6.draw(map.svg, [-50, -50, 50, 50])
