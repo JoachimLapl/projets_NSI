@@ -243,7 +243,6 @@ class Wheel {
                 var murs = this.map.readMatrixCase(cas, this.r)
                 console.log(murs)
                 murs = murs.filter(mur => Vector.isOpposite(vector, mur.vector))
-                // murs.forEach(mur=>mur.line.translate(...cas))
                 console.log(murs)
                 murs.forEach(mur => {
                     // console.log(Vector.add(Vector.multiply(mur.p, this.map.l),[-50,-50]),)

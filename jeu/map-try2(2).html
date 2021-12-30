@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        div {
+            display: grid;
+            grid-template-columns: auto auto auto auto;
+            width: min-content;
+        }
+
+        svg {
+            width: 100vmin;
+            height: 100vmin;
+        }
+
+        line {
+            /* stroke: #ff0; */
+            stroke-width: .4;
+        }
+    </style>
+</head>
+
+<body><svg></svg>
+    <svg>
+        <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3" markerHeight="3"
+                orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill=#0003 />
+            </marker>
+        </defs>
+    </svg>
+    <script>
+        const keys = { };
+        onkeydown = ({ key }) => { keys[key] = true; if (key === 'f') f() };
+        onkeyup = ({ key }) => keys[key] = false;
+    </script>
+    <script>
+        // @ts-check
+
+        function sumArray(array, callback = x => x) {
+            var S = 0;
+            for (let i of array)
+                S += callback(i);
+            return S
+        }
+
+        function polynomial(a, b, c) {
+            const Delta = b ** 2 - 4 * a * c
+            if (Delta < 0) return []
+            if (Delta === 0) return [-b / a / 2]
+            const Dsqrt = Math.sqrt(Delta);
+            return [-(Dsqrt + b) / a / 2, (Dsqrt - b) / a / 2,]
+        }
+
+        class Vector {
+            static add(v, u) { return v.map((e, i) => e + u[i]) }
+            static subtract(v, u) { return v.map((e, i) => e - u[i]) }
+            static multiply(v, n) { return v.map(e => e * n) }
+            static isOpposite(v, u, m = -.01) { return sumArray(Vector.add(v, u), x => x ** 2) < sumArray(v, x => x ** 2) + sumArray(u, x => x ** 2) + m }
+            static getNorm = v => Math.hypot(v[0], v[1]);
+            static setToNorm = (v, s) => (s /= Vector.getNorm(v), v.map(e => e * s || 0));
+            static draw(v, p, svgElement, stroke = "#000", strokeWidth = 1) { svgElement.insertAdjacentHTML('beforeend', `<path d="m ${p[0]},${p[1]} l ${v[0]},${v[1]}" stroke=${stroke} stroke-width=${strokeWidth} marker-end=url(#arrow) />`) }
+        }
+
+        class Point extends Vector {
+            static distance(p, q) { return Math.hypot(p[0] - q[0], p[1] - q[1]) }
+            static translate = Vector.add;
+            static draw(p, svgElement) { svgElement.insertAdjacentHTML('beforeend', `<circle cx=${p[0]} cy=${p[1]} r=1 stroke="#000" stroke-width=".1" />`) }
+        }
+
+        class Droite {
+            static Point_Vector = class extends Droite { constructor(p, v) { super(v[1], -v[0], v[0] * p[1] - v[1] * p[0]) } }
+            static Point_Point = class extends Droite {
+                constructor(p, q) { super(q[1] - p[1], p[0] - q[0], q[0] * p[1] - q[1] * p[0]) }
+            }
+            constructor(a, b, c) { this[0] = a; this[1] = b; this[2] = c }
+            intersection(l) {
+                const [a, b] = [this[0] * l[1], l[0] * this[1]];
+                if (a !== b) {
+                    const x = (this[1] * l[2] - l[1] * this[2]) / (a - b);
+                    const y = (this[0] * l[2] - l[0] * this[2]) / (b - a);
+                    return [x, y];
+                }
+            }
+            PV_intersection(P, v) {
+                const b = this[0] * v[0] + this[1] * v[1];
+                if (b) {
+                    const a = v[1] * P[0] - v[0] * P[1];
+                    return [
+                        (a * this[1] - this[2] * v[0]) / b,
+                        (-a * this[0] - this[2] * v[1]) / b
+                    ]
+                }
+            }
+            closest(point) {
+                const [a2, b2, ab] = [this[0] ** 2, this[1] ** 2, this[0] * this[1]];
+                return [
+                    (b2 * point[0] - ab * point[1] - this[0] * this[2]) / (a2 + b2),
+                    (a2 * point[1] - ab * point[0] - this[1] * this[2]) / (a2 + b2)
+                ]
+            }
+            translate(right = 0, down = 0) { this[2] -= right * this[0] + down * this[1] }
+            homothetia(k) { this[2] *= k }
+            draw(svgElement, view = [0, 0, 1, 1], color = '#f0f') {
+                const i = [
+                    this.intersection([0, -1, view[0]]),
+                    this.intersection([1, 0, -view[1]]),
+                    this.intersection([0, -1, view[2]]),
+                    this.intersection([1, 0, -view[3]])
+                ].filter(e => e && e[0] >= view[0] && e[1] >= view[1] && e[0] <= view[2] && e[1] <= view[3]);
+                const d = i.filter((e, j) => {
+                    for (let k = 0; k < j; k++)
+                        if (i[k][0] === e[0] && i[k][1] === e[1])
+                            return false
+                    return true
+                });
+                // console.log(d, d.length)
+                d.length == 2 && svgElement.insertAdjacentHTML('beforeend', `<line x1=${d[0][0]} y1=${d[0][1]} x2=${d[1][0]} y2=${d[1][1]} stroke="${color}" />`)
+            }
+        }
+        class Circle {
+            constructor(point, radius) {
+                this[0] = point[0]
+                this[1] = point[1]
+                this[2] = radius
+                // (x-xp)**2+(y+yp)**2 = r**2
+            }
+            intersectionLine(line) {
+                return polynomial(
+                    line[0] ** 2 + line[1] ** 2,
+                    2 * (line[1] * line[2] - line[0] ** 2 * this[1]),
+                    -(line[0] ** 2) * (this[2] ** 2 - this[1] ** 2 - this[0] ** 2) + 2 * line[0] * this[0] * (line[1] + line[2]) + line[2] ** 2
+                ).map(y => new Droite(0, 1, -y).intersection(line))
+            }
+            homothetia(k) {
+                this[0] *= k
+                this[1] *= k
+                this[2] *= k
+            }
+        } 
+    </script>
+    <script>
+        // @ts-check
+
+        function tuple(a) {
+            return Object.freeze(a)
+        }
+
+        class Wall {
+            constructor(p, v) {
+                this.line = new Droite(v[0], v[1], -(v[0] * p[0] + v[1] * p[1]))
+                const hypot = Math.hypot(...v)
+                this.p = p;
+                this.vector = tuple(v.map(e => e / hypot))
+            }
+            draw(svgElement) {
+                const i1 = this.line.intersection([0, -1, 0]) || this.line.intersection([1, 0, 0])
+                const i2 = this.line.intersection([0, -1, 1]) || this.line.intersection([1, 0, -1])
+                const j1 = Vector.add(i1, this.vector.map(e => -e * 5))
+                const j2 = Vector.add(i2, this.vector.map(e => -e * 5))
+                svgElement.insertAdjacentHTML('beforeend', `<path d="M ${j1[0]},${j1[1]} L ${i1[0]},${i1[1]} L ${i2[0]},${i2[1]} L ${j2[0]},${j2[1]}" />`)
+            }
+            static AutoConstructed = class {
+                constructor(constructedwall) {
+                    for (let i in constructedwall) {
+                        this[i] = constructedwall[i]
+                    }
+                }
+            }
+            clone() { return new Wall.AutoConstructed(this) }
+        }
+
+        class MAP {
+            static marching_squares = [
+                [],
+                [[[0, .5], [.5, 1], [0, 1]]],
+                [[[.5, 1], [1, .5], [1, 1]]],
+                [[[0, .5], [1, .5], [1, 1], [0, 1]]],
+                [[[1, .5], [.5, 0], [1, 0]]],
+                [[[1, .5], [.5, 0], [1, 0]], [[0, .5], [.5, 1], [0, 1]]],
+                [[[.5, 0], [1, 0], [1, 1], [.5, 1]]],
+                [[[0, .5], [.5, 0], [1, 0], [1, 1], [0, 1]]],
+                [[[0, 0], [.5, 0], [0, .5]]],
+                [[[0, 0], [.5, 0], [.5, 1], [0, 1]]],
+                [[[0, 0], [.5, 0], [0, .5]], [[.5, 1], [1, .5], [1, 1]]],
+                [[[0, 0], [.5, 0], [1, .5], [1, 1], [0, 1]]],
+                [[[0, 0], [1, 0], [1, .5], [0, .5]]],
+                [[[0, 0], [1, 0], [1, .5], [.5, 1], [0, 1]]],
+                [[[0, 0], [1, 0], [1, 1], [.5, 1], [0, .5]]],
+                [[[0, 0], [1, 0], [1, 1], [0, 1]]]
+            ]
+            static WALL = {};
+            static add_WALL(r) {
+                const R = r / Math.SQRT2;
+                return MAP.WALL[r] || (MAP.WALL[r] = [
+                    [],
+                    [new Wall([0 + R, .5 - R], [1, -1])],
+                    [new Wall([1 - R, .5 - R], [-1, -1])],
+                    [new Wall([0, .5 - r], [0, -1])],
+                    [new Wall([1 - R, .5 + R], [-1, 1])],
+                    [new Wall([1 - R, .5 + R], [-1, 1]), new Wall([0, .5 - r], [1, -1])],
+                    [new Wall([.5 - r, 0], [-1, 0])],
+                    [new Wall([-R, .5 - R], [-1, -1])],
+                    [new Wall([R, .5 + R], [1, 1])],
+                    [new Wall([.5 + r, 0], [1, 0])],
+                    [new Wall([R, .5 + R], [1, 1]), new Wall([1, .5 - r], [-1, -1])],
+                    [new Wall([.5 + R, -R], [1, -1])],
+                    [new Wall([0, .5 + r], [0, 1])],
+                    [new Wall([1 + R, .5 + R], [1, 1])],
+                    [new Wall([-R, .5 + R], [-1, 1])],
+                    []
+                ])
+            }
+            static types = [
+                // [slippery: number]
+                [0, '#888'], // basic groud: not slippery at all, grey
+                [.75, '#0ff']   // ice: very slippery, cyan (just a test)
+            ];
+            constructor(string, l, svg, view = [[-50, -60], [50, 40]]) {
+                this.l = l
+                this.matrix = [];
+                string.split(',').map((e, i) => { this.matrix[i] = []; for (let c in e) this.matrix[i][Number(c)] = Number(e[c]) });
+                console.log(this.matrix)
+                this.mat_d = [this.matrix[0].length, this.matrix.length];
+                this.wheels = [];
+                this.relative = [50, 50];
+                this.view = view;
+                this.svg = svg;
+                svg.setAttribute('viewBox', `${this.view[0][0]} ${this.view[0][1]} ${this.view[1][0] - this.view[0][0]} ${this.view[1][1] - this.view[0][1]}`)
+            }
+            addWheel(wheel) {
+                console.log(MAP.add_WALL(wheel.r / this.l));
+                wheel.map = this;
+                this.wheels.push(wheel)
+                this.svg.insertAdjacentHTML('beforeend', `<circle id="wheel" cx=${wheel.pos[0] - this.relative[0]} cy=${wheel.pos[1] - this.relative[1]} r=${wheel.r} fill="#f00" />`)
+                wheel.element = document.querySelector('#wheel')
+                wheel.element.removeAttribute('id')
+            }
+            draw() {
+                const [minX, minY] = this.findPointCase(Point.translate(this.relative, this.view[0])).map(e => Math.max(0, e));
+                const [maxX, maxY] = this.findPointCase(Point.translate(this.relative, this.view[1])).map((e, i) => Math.min(e + 1, this.mat_d[i] - 1));
+                var strs = new Array(MAP.types.length).fill('');
+                for (let y = minY; y < maxY; y++) {
+                    for (let x = minX; x < maxX; x++) {
+                        const bl = [this.matrix[y][x], this.matrix[y][x + 1], this.matrix[y + 1][x + 1], this.matrix[y + 1][x]];
+                        for (let k = 1; k < MAP.types.length + 1; k++) {
+                            if (!bl.every(e => e !== k)) {
+                                const [a, b, c, d] = bl.map(e => Number(e && e <= k));
+                                const path = MAP.marching_squares[a * 8 + b * 4 + c * 2 + d];
+                                path.forEach(points => {
+                                    points.forEach((point, index) => {
+                                        strs[k - 1] += (index === 0 ? ' M ' : ' L ') + ((point[0] + x) * this.l - this.relative[0]) + ',' + ((point[1] + y) * this.l - this.relative[1])
+                                    })
+                                })
+                            }
+                        }
+                    }
+                }
+                this.svg.innerHTML = strs.map((e, i) => `<path d="${e}" fill="${MAP.types[i][1]}" />`).reverse().join('')
+            }
+            findPointCase(p) {
+                return p.map(e => Math.floor(e / this.l));
+            }
+            vectorCases(point, vector) {
+                // On prend un point et un vecteur puis on renvoie toutes les cases de la map par lesquelles passe le vecteur partant du point
+                var [p1, p2] = [point, Vector.add(point, vector)].map(e => this.findPointCase(e));
+                const r = [];
+                const drt = new Droite.Point_Vector(Vector.multiply(point, 1 / this.l), Vector.multiply(vector, 1 / this.l));
+                if (p1[0] === p2[0]) {
+                    const index = p1[1] > p2[1] ? -1 : 1;
+                    for (let i = p1[1]; i !== p2[1] + index; i += index)
+                        r.push([p1[0], i])
+                    return r
+                }
+                if (p1[1] === p2[1]) {
+                    const index = p1[0] > p2[0] ? -1 : 1;
+                    for (let i = p1[0]; i !== p2[0] + index; i += index)
+                        r.push([i, p1[1]])
+                    return r
+                }
+                // if (p1[0] === p2[0] && p1[1] === p2[1]) return [[p1[0], p1[1]]]
+                if (Math.abs(p1[0] - p2[0]) > Math.abs(p1[1] - p2[1])) {
+                    if (vector[0] < 0) { [p1, p2] = [p2, p1] }
+                    // console.log(p1, p2)
+                    var offsetX = p1[0];
+                    const index = p1[1] > p2[1] ? -1 : 1;
+                    for (let y = p1[1]; y !== p2[1] + index; y += index) {
+                        const nX = Math.floor(new Droite(0, 1, -y - index).intersection(drt)[0]);
+                        // console.log(offsetX, nX, "1", new Droite(0, 1, -y - index).intersection(drt)[0]);
+                        for (let x = offsetX; x !== nX + 1 && x !== p2[0] + 1; x++) {
+                            // console.log(x, y);
+                            r.push([x, y])
+                        }
+                        offsetX = nX;
+                    }
+                    return vector[0] < 0 ? r.reverse() : r
+                } else {
+                    if (vector[1] < 0) { [p1, p2] = [p2, p1] }
+                    // console.log(p1, p2)
+                    var offsetY = p1[1];
+                    const index = p1[0] > p2[0] ? -1 : 1;
+                    for (let x = p1[0]; x !== p2[0] + index; x += index) {
+                        const nY = Math.floor(new Droite(1, 0, -x - (index === 1 ? index : 0)).intersection(drt)[1]);
+                        // console.log(offsetY, nY, "1", new Droite(1, 0, -x - index).intersection(drt)[0]);
+                        for (let y = offsetY; y !== nY + 1 && y !== p2[1] + 1; y++) {
+                            // console.log(x, y);
+                            r.push([x, y])
+                        }
+                        offsetY = nY;
+                    }
+                    return vector[1] < 0 ? r.reverse() : r
+                }
+            }
+            circleCases(point, radius) {
+                const circle = new Circle(point, radius)
+                circle.homothetia(1 / this.l);
+                const cases = [];
+                // const p = this.findPointCase(point)
+                const p1 = this.findPointCase(Vector.add(point, [-radius, 0]))
+                const p2 = this.findPointCase(Vector.add(point, [radius, 0]))
+                console.log(p1, p2)
+                const step1 = [];
+                for (let x = p1[0]; x < p2[0] + 1; x++) {
+                    step1.push(circle.intersectionLine(new Droite(1, 0, -x)).map(e => Math.floor(e[1])));
+                }
+                const step2 = [];
+                for (let i = 0, x = p1[0]; i < step1.length + 1; i++, x++) {
+                    console.log(x, step1[i])
+                    const c1 = step1[i - 1];
+                    const c2 = step1[i];
+                    const ys = [step1[i - 1]?.[0], step1[i - 1]?.[1], step1[i]?.[0], step1[i]?.[1]]
+                    console.log(ys)
+                    var min = 0
+                        , max;
+                    step2.push([x, min, max])
+                }
+                console.log(step1)
+                console.log(step2)
+            }
+            vectorCasesWithRadius(point, vector, radius = 0) {
+                // const ps = [point, Vector.add(point, vector)].sort((a, b) => a[1] - b[1]);
+                // const [p1, p2] = ps.map(e => this.findPointCase(e));
+                // const index = p1[0] < p2[0] ? 1 : -1;
+                // var inter = [];
+                // for (let x = p1[0] + index; x * index < p2[0] * index; i += index) {
+                //     const nY = new Droite(1, 0, -x - index).intersection(drt)[1];
+                //     inter.push(nY);
+                // }
+                // inter = [ps[0][1], ...inter, ps[1][1]]
+                // for (let i = 0; i < inter.length - 1; i++) {
+                //     const x = i + p1[0]
+                //     const y = inter[]
+                // }
+            }
+            readMatrixCase(point, radius) {
+                radius /= this.l
+                const i = point[1], j = point[0];
+                // console.log(point, i, j, radius);
+                const bl = [this.matrix[i][j], this.matrix[i][j + 1], this.matrix[i + 1][j + 1], this.matrix[i + 1][j]];
+                const walls = [];
+                for (let k = 1; k < MAP.types.length + 1; k++) {
+                    if (!bl.every(e => e !== k)) {
+                        const [a, b, c, d] = bl.map(e => Number(e && e <= k));
+                        // console.log(bl, [a, b, c, d], a * 8 + b * 4 + c * 2 + d)
+                        // console.log(MAP.WALL[radius], MAP.WALL[radius][a * 8 + b * 4 + c * 2 + d])
+                        // console.log(`%c${a * 8 + b * 4 + c * 2 + d}`, 'size:200%')
+                        const addwalls = MAP.WALL[radius][a * 8 + b * 4 + c * 2 + d];
+                        addwalls.forEach(wall => {
+                            // console.log('%cHELLO WORLD', 'color:#fff; background:#f00;')
+                            // console.log(wall)
+                            wall = wall.clone();
+                            // console.log([wall.line[0], wall.line[1], wall.line[2]])
+                            wall.line = new Droite(wall.line[0], wall.line[1], wall.line[2]);
+                            wall.line.translate(j, i);
+                            // console.log([wall.line[0], wall.line[1], wall.line[2]])
+                            wall.type = k - 1;
+                            walls.push(wall);
+                        })
+                    }
+                }
+                return walls
+            }
+            withinCase(point, cas) {
+                return point[0] >= cas[0] && point[0] <= cas[0] + 1 && point[1] >= cas[1] && point[1] <= cas[1] + 1
+            }
+            withinMap(cas) {
+                return cas[0] > -1 && cas[0] < this.mat_d[0] - 1 && cas[1] > -1 && cas[1] < this.mat_d[0] - 1
+            }
+            drawCircle([x, y], r = 1, c = "#000") {
+                this.svg.insertAdjacentHTML('beforeend', `<circle cx=${x - this.relative[0]} cy=${y - this.relative[1]} r=${r} fill=${c} stroke="none" stroke-width=".1" />`)
+            }
+            drawLine([x1, y1], [x2, y2], w, c = "#000") {
+                this.svg.insertAdjacentHTML('beforeend', `<line x1=${x1 - this.relative[0]} x2=${x2 - this.relative[0]} y1=${y1 - this.relative[1]} y2=${y2 - this.relative[1]} stroke-width=${w} stroke=${c} />`)
+            }
+            drawLineLine(l) {
+                const drt = new Droite(
+                    l[0],
+                    l[1],
+                    l[2] * this.l// - this.relative[0] * l[1] - this.relative[1] * l[0]
+                );
+                drt.translate(-50, -50)
+                // console.log(l, drt)
+                drt.draw(this.svg, [...this.view[0], ...this.view[1]])
+            }
+        }
+
+        class Wheel {
+            constructor(pos, r) {
+                this.pos = pos;
+                this.r = r;
+                this.vector = [0, 0]
+                this.weight = [0, .1];
+                this.rotate = Math.PI / 4;
+                this.power = 0;
+                this.map = undefined;
+                this.element = undefined;
+            }
+            update() {
+                var point = this.pos;
+                var vector = this.vector;
+                this.drawVec()
+                // Vector.draw(vector, Vector.subtract(point, this.map.relative), this.map.svg)
+                var size = Vector.getNorm(this.vector);
+                var Size = size;
+                const map = this.map;
+                var index = 0;
+                while (true && index < 3) {
+                    // console.groupCollapsed(index.toString());
+                    // console.log(point, vector)
+                    const cases = map.vectorCases(point, vector).filter(c => this.map.withinMap(c));
+                    const droite = new Droite.Point_Vector(Vector.multiply(point, 1 / this.map.l), vector);
+                    // map.drawLineLine(droite)
+                    var mur = undefined;
+                    // console.log(cases)
+                    // for (let cas of cases) {
+                    //     // console.groupCollapsed(cas)
+                    //     var murs = this.map.readMatrixCase(cas, this.r)
+                    //     // console.log(murs)
+                    //     murs = murs.filter(mur => Vector.isOpposite(vector, mur.vector))
+                    //     // console.log(murs)
+                    //     // murs.forEach(mur => {
+                    //     //     // console.log(Vector.add(Vector.multiply(mur.p, this.map.l),[-50,-50]),)
+                    //     //     this.map.drawLineLine(mur.line)
+                    //     //     // mur.line.draw(this.map.svg, [-50, -50, 50, 50])
+                    //     //     // new Droite.Point_Vector(Vector.add(Vector.multiply(mur.p, this.map.l), [0, 0]), [-mur.vector[1], mur.vector[0]]).draw(this.map.svg, [-50, -50, 50, 50])
+                    //     // })
+
+
+                    //     murs = murs.map(mur => [mur, droite.intersection(mur.line)])
+                    //     // console.log(murs)
+                    //     murs = murs.filter(m => m[1])
+
+                    //     // murs.forEach(mur => {
+                    //     //     Point.draw(mur[1], this.map.svg)
+                    //     // })
+                    //     murs = murs.filter(mur => this.map.withinCase(mur[1], cas))
+                    //     // console.log(murs)
+                    //     murs = murs.map(mur => [...mur, Point.distance(Vector.multiply(point, 1 / this.map.l), mur[1])])
+                    //     murs = murs.sort((mur1, mur2) => mur1[2] - mur2[2]);
+                    //     // console.log(murs)
+                    //     // console.groupEnd()
+                    //     if (murs.length === 1) {
+                    //         mur = murs[0];
+                    //         break;
+                    //     }
+                    // }
+                    const murs = [];
+                    for (let c of cases) {
+                        this.map.readMatrixCase(c, this.r)
+                            .filter(mur => Vector.isOpposite(vector, mur.vector))
+                            .map(mur => [mur, droite.intersection(mur.line)])
+                            .filter(m => m[1])
+                            // .filter(mur => this.map.withinCase(mur[1], c))
+                            .map(mur => [...mur, Point.distance(Vector.multiply(point, 1 / this.map.l), mur[1])])
+                            .forEach(mur => murs.push(mur))
+                    }
+                    mur = murs.sort((mur1, mur2) => mur1[2] - mur2[2])[0];
+                    if (!mur) {
+                        // console.groupEnd()
+                        break;
+                    }
+                    console.log(vector, mur[0].vector, Vector.isOpposite(vector, mur[0].vector))
+                    // debugger
+                    //          P                    //
+                    //          |\                   //
+                    //          | \                  //
+                    //          |  \                 //
+                    //          |   \    P'          //
+                    //  ________|____\_____________  //
+                    //          Q    R\  |           //
+                    //                 \ |           //
+                    //                  \|           //
+
+                    // console.log('mur', mur)
+                    // this.map.drawLineLine(mur[0].line)
+
+                    const R = Vector.multiply(mur[1], this.map.l);
+                    // this.map.drawLineLine(mur[0].line)
+                    mur[0].line.homothetia(this.map.l)
+                    console.log(mur[0].line)
+                    const aeiiao = new Droite(mur[0].line[0], mur[0].line[1], mur[0].line[2])
+                    aeiiao.translate(...Vector.multiply(this.map.relative, -1))
+                    aeiiao.draw(this.map.svg, [-50, -50, 50, 50])
+                    function randomColor(){
+                        return `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
+                    }
+                    const Q = mur[0].line.closest(point);
+                    const Qc = randomColor();
+                    const Rc = randomColor();
+                    // this.map.drawCircle(Q, .5, Qc)
+                    // this.map.drawCircle(R, .5, Rc)
+                    const PR = mur[2] * this.map.l;//Point.distance(point, R);
+                    const QR = Point.distance(R, Q);                 // # merci Thalès
+                    const v_QR = Vector.subtract(R, Q);
+
+                    console.log('P', point)
+                    console.log('%cR',`color:${Rc}`, R)
+                    console.log('%cQ',`color:${Qc}`, Q)
+                    console.log('PR', PR)
+                    console.log('QR', QR)
+                    console.log('v_QR', v_QR)
+
+                    const Pp = mur[0].line.closest(Point.translate(point, vector));
+                    const Ppc = randomColor();
+                    // this.map.drawCircle(Pp, .5,Ppc)
+                    console.log('%cPp',`color:${Ppc}`, Pp)
+                    const PpQ = Point.distance(Pp,Q)
+
+                    const nV = Vector.subtract(point, R);
+
+                    const sin = PpQ / Size; // sinus de l'angle QPR
+                    // console.log(sin, QR, PR)
+                    Size *= sin;
+                    if (size < PR) {
+                        // console.groupEnd()
+                        point = Vector.subtract(Pp,vector)
+                        break;
+                    }
+                    // console.log('sin', sin)
+                    // console.log(size)
+                    // size = (size - PR) * sin;
+                    // console.log('size', size)
+                    vector = Vector.subtract(Pp, R)
+
+                    // Point.draw(Vector.subtract(Pp, this.map.relative), this.map.svg)
+
+                    // Vector.draw(Vector.subtract(Vector.setToNorm(v_QR, size), Vector.setToNorm(vector, Vector.getNorm(vector) - PR)), Vector.subtract(Point.translate(point, vector), this.map.relative), this.map.svg, "#00f6", .1)
+                    const traction = [];
+                    size = Vector.getNorm(vector);
+
+                    /* wheel rotation */
+                    this.power = !!keys.ArrowLeft - !!keys.ArrowRight;
+                    const d = this.rotate * this.power * (MAP.types[mur[0].type][0] - 1);
+                    const v = [-mur[0].vector[1], mur[0].vector[0]];
+                    // console.log(this.power, this.rotate,mur[0].type, MAP.types[mur[0].type][0],d, Vector.multiply(v,d))
+                    Vector.draw(Vector.multiply(v, d), Vector.subtract(point, this.map.relative), this.map.svg, '#00f', .5)
+                    vector = Vector.add(vector, Vector.multiply(v, d));
+
+
+                    // console.log(vector, size, v_QR)
+                    // Vector.draw(vector, Point.translate(R, [-50, -50]), this.map.svg, "#00f6", .1)
+                    point = R;
+                    console.log(R, vector)
+                    // console.groupEnd()
+                    index++;
+                }
+                this.pos = Vector.add(point, vector);
+                this.vector = Vector.setToNorm(vector, Size);
+                // console.log(this.vector)
+                this.vector = Vector.add(this.vector, this.weight);
+                this.vector = Vector.multiply(this.vector, .99);
+                // console.log(this.vector)
+                Vector.draw(this.vector, Vector.subtract(this.pos, this.map.relative), this.map.svg, "#0ff9", .1)
+                // this.display();
+            }
+            display() {
+                this.map?.drawCircle?.(this.pos, this.r, "#f00")
+                // console.log(this.element)
+                // this.element?.setAttribute?.('cx', this.pos[0]-this.map.relative[0])
+                // this.element?.setAttribute?.('cy', this.pos[1]-this.map.relative[1])
+            }
+            drawVec() {
+                Vector.draw(this.vector, Vector.subtract(this.pos, this.map.relative), this.map.svg, "#0005", .3)
+            }
+        }
+    </script>
+    <script>
+        // @ts-check
+
+        const svg = document.querySelector('svg')
+
+        // const map = new MAP(new Array(100).fill(0).map(e=>new Array(100).fill(0).map(e=>Number(Math.random()>.5)).join('')).join(','), 20, svg);
+        const map = new MAP(`0000000000,1000000000,1200001222,1101111222,1111111112`, 20, svg);
+        const wheel = new Wheel([50, 50], 5);
+        // wheel.vector = [0, 45]
+        const drt = new Droite.Point_Vector(Vector.multiply(wheel.pos, 1 / map.l), wheel.vector)
+        map.addWheel(wheel)
+        map.draw();
+        wheel.display();
+        // drt.homothetia(1 / map.l)
+        map.drawLineLine(drt)
+        wheel.update()
+        // const drt2 = new Droite.Point_Vector([0, 0], [1, 1])
+        // const drt3 = new Droite.Point_Vector([0, 0], [1, 0])
+        // const drt4 = new Droite.Point_Vector([0, 0], [0, 1])
+        // // map.drawLineLine(drt2)
+        // // map.drawLineLine(drt3)
+        // // map.drawLineLine(drt4)
+        // drt2.translate(10, 10)
+        // drt3.translate(10, 10)
+        // drt4.translate(10, 10)
+        // drt2.draw(map.svg, [-50, -50, 50, 50])
+        // drt3.draw(map.svg, [-50, -50, 50, 50])
+        // drt4.draw(map.svg, [-50, -50, 50, 50])
+        // drt2.homothetia(3)
+        // drt3.homothetia(3)
+        // drt4.homothetia(3)
+        // drt2.draw(map.svg, [-50, -50, 50, 50])
+        // drt3.draw(map.svg, [-50, -50, 50, 50])
+        // drt4.draw(map.svg, [-50, -50, 50, 50])
+
+        // const drt5 = MAP.WALL[.25][2][0].line
+        // const drt6 = MAP.WALL[.25][7][0].line
+
+        // // drt5.homothetia(map.l)
+        // // drt6.homothetia(map.l)
+
+        // drt5.draw(map.svg, [-50, -50, 50, 50], '#00f')
+        // drt6.draw(map.svg, [-50, -50, 50, 50], '#f00')
+
+        // console.log(drt5[2], drt6[2]);
+        // drt5.translate(0, 0)
+        // drt6.translate(0, 1)
+
+        // drt6.draw(map.svg, [-50, -50, 50, 50], '#0f0')
+
+        // console.log(drt5, drt6)
+        var Stop = false;
+        const f = () => {
+            console.log(keys)
+            !Stop && requestAnimationFrame(f);
+            map.draw();
+            wheel.update();
+            map.relative = wheel.pos;
+            wheel.display()
+        }
+    </script>
+</body>
+
+</html>
