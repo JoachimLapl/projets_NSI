@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        div {
+            display: grid;
+            grid-template-columns: auto auto auto auto;
+            width: min-content;
+        }
+
+        svg {
+            width: 100vmin;
+            height: 100vmin;
+        }
+
+        line {
+            /* stroke: #ff0; */
+            stroke: #000;
+            stroke-width: .4;
+        }
+    </style>
+</head>
+
+<body>
+    <svg viewBox="-50 -50 100 100">
+        <line id="wheel-direct" x1=-20 y1=0 x2=20 y2=0 />
+    </svg>
+    <svg>
+        <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3" markerHeight="3"
+                orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill=#0003 />
+            </marker>
+        </defs>
+    </svg>
+    <script>
+        const keys = {};
+        onkeydown = ({ key }) => { keys[key] = true; if (key === 'f') f(); if (!isNaN(Number(key))) decuplation = Number(key) };
+        onkeyup = ({ key }) => keys[key] = false;
+    </script>
+    <script>
+        const svg = document.querySelector('svg');
+        const line = svg.querySelector('#wheel-direct');
+
+        var rotate = 0;
+        const powerIndex = .97;
+        var decuplation = 1;
+        var overallRotation = 0;
+
+        var Stop = false;
+        const f = () => {
+            !Stop && requestAnimationFrame(f);
+            const r = (Boolean(keys.ArrowRight)-Boolean(keys.ArrowLeft)) * decuplation * powerIndex * Math.PI / 2;
+            const power = powerIndex / decuplation/10;
+            const d = (rotate - r) * power;
+            rotate -= d;
+            overallRotation += rotate;
+            line.setAttribute('transform', `rotate(${overallRotation})`)
+        }
+
+    </script>
+</body>
+
+</html>

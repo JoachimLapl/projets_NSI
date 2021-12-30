@@ -35,7 +35,7 @@
         </defs>
     </svg>
     <script>
-        const keys = { };
+        const keys = {};
         onkeydown = ({ key }) => { keys[key] = true; if (key === 'f') f() };
         onkeyup = ({ key }) => keys[key] = false;
     </script>
@@ -416,11 +416,15 @@
                 this.vector = [0, 0]
                 this.weight = [0, .1];
                 this.rotate = Math.PI / 4;
-                this.power = 0;
+                this.power = .5;
+                this.decuplation = 2;
                 this.map = undefined;
                 this.element = undefined;
             }
             update() {
+                this.power = keys[" "] ? .8 : 1 / this.decuplation;
+                this.rotate = (!!keys.ArrowLeft - !!keys.ArrowRight) * Math.PI / 8 * this.decuplation;
+
                 var point = this.pos;
                 var vector = this.vector;
                 this.drawVec()
@@ -506,8 +510,8 @@
                     const aeiiao = new Droite(mur[0].line[0], mur[0].line[1], mur[0].line[2])
                     aeiiao.translate(...Vector.multiply(this.map.relative, -1))
                     aeiiao.draw(this.map.svg, [-50, -50, 50, 50])
-                    function randomColor(){
-                        return `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`
+                    function randomColor() {
+                        return `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`
                     }
                     const Q = mur[0].line.closest(point);
                     const Qc = randomColor();
@@ -519,8 +523,8 @@
                     const v_QR = Vector.subtract(R, Q);
 
                     console.log('P', point)
-                    console.log('%cR',`color:${Rc}`, R)
-                    console.log('%cQ',`color:${Qc}`, Q)
+                    console.log('%cR', `color:${Rc}`, R)
+                    console.log('%cQ', `color:${Qc}`, Q)
                     console.log('PR', PR)
                     console.log('QR', QR)
                     console.log('v_QR', v_QR)
@@ -528,17 +532,17 @@
                     const Pp = mur[0].line.closest(Point.translate(point, vector));
                     const Ppc = randomColor();
                     // this.map.drawCircle(Pp, .5,Ppc)
-                    console.log('%cPp',`color:${Ppc}`, Pp)
-                    const PpQ = Point.distance(Pp,Q)
+                    console.log('%cPp', `color:${Ppc}`, Pp)
+                    const PpQ = Point.distance(Pp, Q)
 
                     const nV = Vector.subtract(point, R);
 
-                    const sin = PpQ / Size; // sinus de l'angle QPR
+                    // const sin = PpQ / Size; // sinus de l'angle QPR
                     // console.log(sin, QR, PR)
-                    Size *= sin;
+                    Size = PpQ;
                     if (size < PR) {
                         // console.groupEnd()
-                        point = Vector.subtract(Pp,vector)
+                        point = Vector.subtract(Pp, vector)
                         break;
                     }
                     // console.log('sin', sin)
@@ -554,9 +558,12 @@
                     size = Vector.getNorm(vector);
 
                     /* wheel rotation */
-                    this.power = !!keys.ArrowLeft - !!keys.ArrowRight;
                     const d = this.rotate * this.power * (MAP.types[mur[0].type][0] - 1);
                     const v = [-mur[0].vector[1], mur[0].vector[0]];
+                    const a = (Vector.isOpposite(v, vector) ? -1 : 1) * size
+                    const s = (a + this.rotate) / 2 * this.power / a;
+                    console.log(s)
+
                     // console.log(this.power, this.rotate,mur[0].type, MAP.types[mur[0].type][0],d, Vector.multiply(v,d))
                     Vector.draw(Vector.multiply(v, d), Vector.subtract(point, this.map.relative), this.map.svg, '#00f', .5)
                     vector = Vector.add(vector, Vector.multiply(v, d));

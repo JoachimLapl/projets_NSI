@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        html,body,svg {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            /*display: flex;*/ 
+            align-items: center;
+            justify-content: center;
+        }
+        
+        svg{
+        	height: 100vmin;
+        	width: 100vmin;
+        }
+
+        circle {
+            r: 2;
+            stroke: #000;
+            fill: #fff;
+        }
+
+        line {
+            stroke: #000;
+        }
+        
+        #orienration{
+        	position: absolute;
+        	top: 0;
+        	left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <svg>
+        <line id=trait1 />
+        <line id=trait2 />
+        <line id=trait3 />
+        <line id=trait4 />
+        <line id=trait5 />
+        <line id=trait6 />
+        <line id=trait7 />
+        <line id=trait8 />
+        <line id=trait9 />
+        <line id=trait10 />
+        <line id=trait11 />
+        <line id=trait12 />
+        <circle id=w1 />
+        <circle id=w2 />
+        <circle id=w3 />
+        <circle id=w4 />
+    </svg>
+    <div id=orientation>
+    <div></div>
+    <div></div>
+    <div></div>
+    </div>
+    <script>
+		alert( 'hi ') 
+    try {
+        const $ = (s, p = document) => p.querySelector(s);
+        const svg = $('svg');
+        const orient = $('#orientation')
+        const p2=Math.PI/2
+        const keys = {};
+        onmousedown = ({ key }) => keys[key] = true;
+        onmouseup = ({ key }) => keys[key] = false;
+        const mouseposition = { x: innerWidth/2, y: innerHeight/2 }
+        onmousemove = ({ x, y }) => { mouseposition.x = x; mouseposition.y = y };
+
+        class Map {
+            constructor(height=100, width=100) {
+            	this.height = height
+            	this.width = width
+            	svg.setAttribute('viewBox', `${-width/2} ${-height/2} ${width} ${height}`)
+            }
+        }
+        
+        class MotionPoint{
+        	constructor (x,y){
+        		this.pos = [x,y]
+        		this.traits_v = []
+        		this.v = [0,0]
+        	}
+        	addTrait(vector){
+        		this.traits_v.push(vector)
+        	}
+        	update(){  
+        		this.traits_v.forEach(v=>{
+        			this.v[0]+=v[0]
+        			this.v[1]+=v[1]
+        		})
+        		this.v[1]+=.1
+        		this.pos[0]+=this.v[0]
+        		this.pos[1]+=this.v[1]
+        		if (this.pos[1]>50) this.pos[1] = 50
+        		this.v = this.v.map(e=>e*.95)
+        	}
+        }
+        
+        class Trait{
+        	constructor(p1,p2,size,elasticity, el){
+        		this.p1 = p1;
+        		this.p2 = p2;
+        		this.size = size;
+        		this.v1 = [0,0];
+        		p1.addTrait(this.v1);
+        		this.v2 = [0,0];
+        		p2.addTrait(this.v2);
+        		this.elas =  1 - elasticity;
+        		this.el = el;
+        	}
+        	update(){
+        		var a = this.p1.pos[0]-this.p2.pos[0]
+        		var b = this.p1.pos[1]-this.p2.pos[1]
+        		const h = Math.hypot(a,b)
+        //		orient.children[0].innerText = h 
+        		const  s = (h-this.size)/2 * this.elas/h
+      //  		orient.children[1].innerText = s 
+        		a *= s
+        		b *= s
+        		this.v1[0] -= a
+        		this.v1[1] -= b
+        		this.v2[0] += a
+        		this.v2[1] += b
+        	}
+        	display(){ 
+       	 	this.el.x1.baseVal.value=this.p1.pos[0]
+       	 	this.el.y1.baseVal.value=this.p1.pos[1]
+      	  	this.el.x2.baseVal.value=this.p2.pos[0]
+      	  	this.el.y2.baseVal.value=this.p2.pos[1]
+      	  	this.reset()
+        	}
+        	reset(){ 
+       	 	this.v1[0]=0
+       	 	this.v1[1]=0
+       	 	this.v2[0]=0
+       	 	this.v2[1]=0
+        	}
+        }
+
+		class Wheel extends MotionPoint {
+			constructor(x,y, el){
+				super(x,y)
+				this.el = el
+			}
+			display(){
+				this.el.cx.baseVal.value=this.pos[0]
+				this.el.cy.baseVal.value=this.pos[1]
+			}
+		}
+	
+		new Map()
+		const wheels = [
+			new Wheel(-24,0, $('#w1',svg)),
+			new Wheel( -8,0, $('#w2',svg)),
+			new Wheel(  8,0, $('#w3',svg)),
+			new Wheel( 24,0, $('#w4',svg))
+		];
+		const points = [
+			new MotionPoint(-12,-12),
+			new MotionPoint(0,-12),
+			new MotionPoint(12,-12)
+		];
+		e = 0.1
+		const traits = [
+			new Trait(wheels[0],wheels[1], 20, e, $('#trait1',svg)),
+			new Trait(wheels[1],wheels[2], 16, e, $('#trait2',svg)),
+			new Trait(wheels[2],wheels[3], 16, e, $('#trait3',svg)),
+			new Trait(wheels[0], points[0], 16, e, $('#trait4',svg)),
+			new Trait(wheels[1], points[0], 16, e, $('#trait5',svg)),
+			new Trait(wheels[1], points[1], 16, e, $('#trait6',svg)),
+			new Trait(wheels[2], points[1], 16, e, $('#trait7',svg)),
+			new Trait(wheels[2], points[2], 16, e, $('#trait8',svg)),
+			new Trait(wheels[3], points[2], 16, e, $('#trait9',svg)),
+			new Trait( points[0], points[1], 16, e, $('#trait10',svg)),
+			new Trait( points[1], points[2], 16, e, $('#trait11',svg))
+		];
+		
+
+		[...wheels, ...traits].forEach(e=>e.display());
+        (loop = () => {
+        	//orient.children[1].innerText = mouseposition.x
+        //	orient.children[2 ].innerText = mouseposition.y
+            requestAnimationFrame(loop);
+			[...traits, ...wheels, ...points].forEach(e=>e.update());
+			[...wheels, ...traits].forEach(e=>e.display());
+
+        }) ();
+    } catch(e){alert(e)}
+    </script>
+
+</body>
+
+
+
+</html>
