@@ -60,7 +60,6 @@
     <div></div>
     </div>
     <script>
-		alert( 'hi ') 
     try {
         const $ = (s, p = document) => p.querySelector(s);
         const svg = $('svg');
@@ -166,19 +165,26 @@
 			new MotionPoint(0,-12),
 			new MotionPoint(12,-12)
 		];
-		e = 0.1
+		e = .5
+		Object.defineProperties(window,{
+			r:{
+				get: function(){
+					return Math.random()*10+10
+				}
+			}
+		})
 		const traits = [
-			new Trait(wheels[0],wheels[1], 20, e, $('#trait1',svg)),
-			new Trait(wheels[1],wheels[2], 16, e, $('#trait2',svg)),
-			new Trait(wheels[2],wheels[3], 16, e, $('#trait3',svg)),
-			new Trait(wheels[0], points[0], 16, e, $('#trait4',svg)),
-			new Trait(wheels[1], points[0], 16, e, $('#trait5',svg)),
-			new Trait(wheels[1], points[1], 16, e, $('#trait6',svg)),
-			new Trait(wheels[2], points[1], 16, e, $('#trait7',svg)),
-			new Trait(wheels[2], points[2], 16, e, $('#trait8',svg)),
-			new Trait(wheels[3], points[2], 16, e, $('#trait9',svg)),
-			new Trait( points[0], points[1], 16, e, $('#trait10',svg)),
-			new Trait( points[1], points[2], 16, e, $('#trait11',svg))
+			new Trait(wheels[0],wheels[1], r, e, $('#trait1',svg)),
+			new Trait(wheels[1],wheels[2], r, e, $('#trait2',svg)),
+			new Trait(wheels[2],wheels[3], r, e, $('#trait3',svg)),
+			new Trait(wheels[0], points[0], r, e, $('#trait4',svg)),
+			new Trait(wheels[1], points[0], r, e, $('#trait5',svg)),
+			new Trait(wheels[1], points[1], r, e, $('#trait6',svg)),
+			new Trait(wheels[2], points[1], r, e, $('#trait7',svg)),
+			new Trait(wheels[2], points[2], r, e, $('#trait8',svg)),
+			new Trait(wheels[3], points[2], r, e, $('#trait9',svg)),
+			new Trait( points[0], points[1], r, e, $('#trait10',svg)),
+			new Trait( points[1], points[2], r, e, $('#trait11',svg))
 		];
 		
 

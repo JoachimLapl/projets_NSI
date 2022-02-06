@@ -99,6 +99,51 @@
             update() { this.nextpos = this.pos.map((e, i) => e + this.force[i]) }
         }
 
+        class AttachPoint{
+            constructor(point, mass=1){
+                this.point = point;
+                this.forces = [[0,mass]];
+            }
+            addForce(f){
+                this.froces.push(f)
+            }
+            update(){
+                self.point = this.point.map((e, i) => e + this.forces.map(f=>f[i]).reduce((s,p)=>s+p))
+            }
+        }
+
+        class Spring {
+        	constructor(p1,p2,size,elasticity, el){
+        		this.p1 = p1;
+        		this.p2 = p2;
+        		this.size = size;
+        		this.v1 = [0,0];
+        		p1.addTrait(this.v1);
+        		this.v2 = [0,0];
+        		p2.addTrait(this.v2);
+        		this.elas =  1 - elasticity;
+        		this.el = el;
+        	}
+        	update(){
+        		var a = this.p1.pos[0]-this.p2.pos[0]
+        		var b = this.p1.pos[1]-this.p2.pos[1]
+        		const h = Math.hypot(a,b)
+        		const  s = (h-this.size)/2 * this.elas/h
+        		a *= s
+        		b *= s
+        		this.v1[0] = -a
+        		this.v1[1] = -b
+        		this.v2[0] = a
+        		this.v2[1] = b
+        	}
+        	display(){ 
+       	 	this.el.x1.baseVal.value=this.p1.pos[0]
+       	 	this.el.y1.baseVal.value=this.p1.pos[1]
+      	  	this.el.x2.baseVal.value=this.p2.pos[0]
+      	  	this.el.y2.baseVal.value=this.p2.pos[1]
+        	}
+        }
+
         class Chassis {
             constructor(map, r = 10) {
                 this.line = $('line', svg);
@@ -114,6 +159,7 @@
                     new Propeller(this, [r, 0], $('#prop2', svg))
                 ]
                 this.weight = new Weight([0, 0]);
+                this.attachPoint = [0,0];
                 this.rotateIndex = 0;
             }
             update() {

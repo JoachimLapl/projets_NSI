@@ -415,16 +415,14 @@
                 this.r = r;
                 this.vector = [0, 0]
                 this.weight = [0, .1];
-                this.rotate = Math.PI / 4;
-                this.power = .5;
-                this.decuplation = 2;
+                this.rotate = 0;
+                this.powerIndex = .97;
+                this.decuplation = 9;
                 this.map = undefined;
                 this.element = undefined;
+                this.bounce = .5;
             }
             update() {
-                this.power = keys[" "] ? .8 : 1 / this.decuplation;
-                this.rotate = (!!keys.ArrowLeft - !!keys.ArrowRight) * Math.PI / 8 * this.decuplation;
-
                 var point = this.pos;
                 var vector = this.vector;
                 this.drawVec()
@@ -488,7 +486,7 @@
                         // console.groupEnd()
                         break;
                     }
-                    console.log(vector, mur[0].vector, Vector.isOpposite(vector, mur[0].vector))
+                    // console.log(vector, mur[0].vector, Vector.isOpposite(vector, mur[0].vector))
                     // debugger
                     //          P                    //
                     //          |\                   //
@@ -506,7 +504,7 @@
                     const R = Vector.multiply(mur[1], this.map.l);
                     // this.map.drawLineLine(mur[0].line)
                     mur[0].line.homothetia(this.map.l)
-                    console.log(mur[0].line)
+                    // console.log(mur[0].line)
                     const aeiiao = new Droite(mur[0].line[0], mur[0].line[1], mur[0].line[2])
                     aeiiao.translate(...Vector.multiply(this.map.relative, -1))
                     aeiiao.draw(this.map.svg, [-50, -50, 50, 50])
@@ -522,17 +520,17 @@
                     const QR = Point.distance(R, Q);                 // # merci Thalès
                     const v_QR = Vector.subtract(R, Q);
 
-                    console.log('P', point)
-                    console.log('%cR', `color:${Rc}`, R)
-                    console.log('%cQ', `color:${Qc}`, Q)
-                    console.log('PR', PR)
-                    console.log('QR', QR)
-                    console.log('v_QR', v_QR)
+                    // console.log('P', point)
+                    // console.log('%cR', `color:${Rc}`, R)
+                    // console.log('%cQ', `color:${Qc}`, Q)
+                    // console.log('PR', PR)
+                    // console.log('QR', QR)
+                    // console.log('v_QR', v_QR)
 
                     const Pp = mur[0].line.closest(Point.translate(point, vector));
                     const Ppc = randomColor();
                     // this.map.drawCircle(Pp, .5,Ppc)
-                    console.log('%cPp', `color:${Ppc}`, Pp)
+                    // console.log('%cPp', `color:${Ppc}`, Pp)
                     const PpQ = Point.distance(Pp, Q)
 
                     const nV = Vector.subtract(point, R);
@@ -558,21 +556,35 @@
                     size = Vector.getNorm(vector);
 
                     /* wheel rotation */
-                    const d = this.rotate * this.power * (MAP.types[mur[0].type][0] - 1);
                     const v = [-mur[0].vector[1], mur[0].vector[0]];
-                    const a = (Vector.isOpposite(v, vector) ? -1 : 1) * size
-                    const s = (a + this.rotate) / 2 * this.power / a;
-                    console.log(s)
+                    const f = 1 - MAP.types[mur[0].type][0];
+                    const a = vector[0] / v[0] * f;//(Vector.isOpposite(v, vector) ? -1 : 1) * size
+                    Vector.draw(Vector.multiply(v, a * 10), Vector.subtract(R, this.map.relative), this.map.svg, '#f00')
+                    console.log(a)
+                    this.rotate = a;
+                    var r, power;
+                    if (keys[" "]) {
+                        power = 2 ** (-Math.abs(this.rotate));
+                        r = 0;
+                    } else {
+                        r = (Boolean(keys.ArrowRight) - Boolean(keys.ArrowLeft)) * this.decuplation * this.powerIndex * Math.PI / 2;
+                        power = this.powerIndex / this.decuplation / 10;
+                    }
+                    const d = (this.rotate - r) * power * f*2;
+                    this.rotate -= d;
+                    console.log(this.rotate)
+
+                    vector = Vector.multiply(v, this.rotate)
 
                     // console.log(this.power, this.rotate,mur[0].type, MAP.types[mur[0].type][0],d, Vector.multiply(v,d))
                     Vector.draw(Vector.multiply(v, d), Vector.subtract(point, this.map.relative), this.map.svg, '#00f', .5)
-                    vector = Vector.add(vector, Vector.multiply(v, d));
+                    // vector = Vector.add(vector, Vector.multiply(v, d));
 
 
                     // console.log(vector, size, v_QR)
                     // Vector.draw(vector, Point.translate(R, [-50, -50]), this.map.svg, "#00f6", .1)
                     point = R;
-                    console.log(R, vector)
+                    // console.log(R, vector)
                     // console.groupEnd()
                     index++;
                 }
@@ -580,7 +592,7 @@
                 this.vector = Vector.setToNorm(vector, Size);
                 // console.log(this.vector)
                 this.vector = Vector.add(this.vector, this.weight);
-                this.vector = Vector.multiply(this.vector, .99);
+                this.vector = Vector.multiply(this.vector, .995);
                 // console.log(this.vector)
                 Vector.draw(this.vector, Vector.subtract(this.pos, this.map.relative), this.map.svg, "#0ff9", .1)
                 // this.display();
@@ -649,12 +661,12 @@
         // console.log(drt5, drt6)
         var Stop = false;
         const f = () => {
-            console.log(keys)
+            // console.log(keys)
             !Stop && requestAnimationFrame(f);
             map.draw();
             wheel.update();
             map.relative = wheel.pos;
-            wheel.display()
+            // wheel.display()
         }
     </script>
 </body>

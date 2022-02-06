@@ -40,7 +40,7 @@
     </svg>
     <script>
         const keys = {};
-        onkeydown = ({ key }) => { keys[key] = true; if (key === 'f') f(); if (!isNaN(Number(key))) decuplation = Number(key) };
+        onkeydown = ({ key }) => { keys[key] = true; if (key === 'f') f(); if (!isNaN(Number(key))&&key!==' ') decuplation = Number(key) };
         onkeyup = ({ key }) => keys[key] = false;
     </script>
     <script>
@@ -55,8 +55,17 @@
         var Stop = false;
         const f = () => {
             !Stop && requestAnimationFrame(f);
-            const r = (Boolean(keys.ArrowRight)-Boolean(keys.ArrowLeft)) * decuplation * powerIndex * Math.PI / 2;
-            const power = powerIndex / decuplation/10;
+            var r, power;
+            if (keys[" "]) {
+                power = 2 ** (-Math.abs(rotate)/2);
+                r = 0;
+                console.log(power)
+            } else {
+                r = (Boolean(keys.ArrowRight) - Boolean(keys.ArrowLeft)) * decuplation * powerIndex * Math.PI / 2;
+                power = powerIndex / decuplation / 10;
+                console.log( powerIndex , decuplation )
+            }
+            console.log(rotate,r,power)
             const d = (rotate - r) * power;
             rotate -= d;
             overallRotation += rotate;

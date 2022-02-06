@@ -14,7 +14,7 @@ def polynomial(a, b, c):
     Dsqrt = Math.sqrt(Delta)
     return -(Dsqrt + b) / a / 2, (Dsqrt - b) / a / 2,
 
-def map(itera, callback=lambda x,i:x):
+def mp(itera, callback=lambda x,i:x):
     return tuple(callback(itera[i],i) for i in range(len(itera)))
 
 def hypot(*v):
@@ -118,7 +118,7 @@ class Circle:
         self.b = point[1]
         self.c = radius
     def intersectionLine(self, line: Droite):
-        return map(polynomial(
+        return mp(polynomial(
             line.a ** 2 + line.b ** 2,
             2 * (line.b * line.c - line.a ** 2 * self.b),
             -(line.a ** 2) * (self.c ** 2 - self.b ** 2 - self.a ** 2) + 2 * line.a * self.a * (line.b + line.c) + line.c ** 2
