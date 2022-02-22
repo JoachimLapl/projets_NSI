@@ -108,7 +108,7 @@
                 this.froces.push(f)
             }
             update(){
-                self.point = this.point.map((e, i) => e + this.forces.map(f=>f[i]).reduce((s,p)=>s+p))
+                this.point = this.point.map((e, i) => e + this.forces.map(f=>f[i]).reduce((s,p)=>s+p))
             }
         }
 

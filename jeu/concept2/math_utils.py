@@ -55,7 +55,12 @@ class Vector:
         return Vector.multiply(v,s)
     @classmethod
     def getAngle(cl, v):
-        return acos(v[0]/v.getNorm()) if v[1]<0 else -acos(v[0]/v.getNorm())
+        return acos(v[0]/Vector.getNorm(v)) if v[1]<0 else -acos(v[0]/Vector.getNorm(v))
+    @classmethod 
+    def rotate(cl, v, u, trigo = True):
+        if type(u) is float: u = cos(u),sin(u)
+        coef = 1 if trigo else -1
+        return u[0]*v[0]-u[1]*v[1]*coef, u[0]*v[1]+u[1]*v[0]*coef
     @classmethod
     def draw(cl,v,p,w=.5,c=0x000000):
         q = Vector.add(p,v)
@@ -199,3 +204,8 @@ class Interval:
             if Interval.intersects(i1[0],i2[0]) and Interval.intersects(i1[1],i2[1]):
                 return True
             return False
+
+class Triangle:
+    @classmethod
+    def angleFromSides(cl, a1,a2,o):
+        return acos(min(max((a1**2+a2**2-o**2)/(2*a1*a2),-1),1))

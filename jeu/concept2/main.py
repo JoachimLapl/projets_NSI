@@ -20,7 +20,7 @@ with open('data.txt') as f:
             )
         ),
         (5,10),
-        mi/20,
+        mi/50,
         images
     )
 print(carte.points)
@@ -28,8 +28,15 @@ print(carte.blocks, "blocks")
 block = mp.Block(((0,0),(1,-1),(0,-2),(-2,-1),(-1,2),(1,3)))
 # print(block.vectors, block.v_ns, block.offset_vectors, sep='\n')
 
-wheel = mp.Wheel((0,-10),1)
-carte.insert_wheel(wheel)
+# wheel = mp.Wheel((0,-10),1)
+# carte.insert_wheel(wheel)
+chassis = mp.Chassis(
+    carte,
+    (0,-100),
+    ((-20,0),(0,-10),(20,0)),
+    20,
+    ((-5,5),(5,5),(-15,5),(15,5))
+)
 
 # chassis = mp.Chassis((0,-10),((-3,0),(3,0),(0,-2)), ((-3,1),(0,1),(3,1)),1) # position, path, wheels_pos, wheels_rad, spring_elas=.5
 # carte.insert_chassis(chassis)
@@ -41,12 +48,14 @@ while RUN:
     # for w in block.elab_walls(1).walls:
     #     w.draw(mid_screen, 50)
     # block.draw(mid_screen, 50)
-    for b in carte.radBlocks[wheel.r]:
+    for b in carte.radBlocks[chassis.w_r]:
         for w in b.walls:
-            w.draw(Vector.subtract(carte.center,carte.relative), carte.l)
+            w.draw(Vector.subtract(carte.center,carte.relative), 1)
     # Vector.draw((100,100),(198.29424612264538, 218.90053972500195),3, 0x00ff00)
     carte.update()
-    carte.relative = Vector.multiply(wheel.pos,carte.l)
+    # chassis.update()
+    carte.relative = chassis.p
+    # chassis.draw()
     carte.draw()
     for v in mp.vectors:
         Vector.draw(v[0], Vector.add(Vector.subtract(carte.center, carte.relative),Vector.multiply(v[1],carte.l)),1, 0xff0000)

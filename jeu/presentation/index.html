@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            background: rgb(83, 130, 168);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body>:not(svg) {
+            display: none;
+        }
+
+        svg {
+            height: 100%;
+            width: 100%;
+            user-select: none;
+        }
+
+        .button {
+            cursor: pointer;
+        }
+
+        .present {
+            height: 80vh;
+            width: 80vw;
+            background: #fff;
+            box-shadow: inset 10px 10px 100px #0004, 5px 5px 10px #0007;
+            border-radius: 1vh;
+            padding: 4vh;
+        }
+
+        .present * {
+            margin: 0;
+        }
+
+        .present>h1 {
+            text-decoration: underline;
+        }
+
+        .present svg {
+            max-height: 70vh;
+            overflow: visible;
+        }
+        .present div>ul {
+            font-size: 150%;
+        }
+    </style>
+</head>
+
+<body>
+    <svg viewBox="-75 -50 150 100">
+        <g id="background" />
+        <g transform="matrix(.75, 0, 0, .75, 0, 38)" class=button id=box onclick="next()">
+            <rect width="90" height="16" x="-45" y="-14" fill="#f00" stroke="#000" stroke-width=".5">
+                <animate attributeName="fill" values="#a00" begin="box.mouseover" end="box.mouseout" />
+            </rect>
+            <text text-anchor="middle" font-family=fantasy fill=#fff>Projet TAMED</text>
+        </g>
+    </svg>
+    <div class=present>
+        <h1>Objectifs du projet</h1>
+        <div>
+            <svg viewBox="0 0 462 260">
+                <image href="assets/ID.png" height=173.5 width=260.25 y=85 id=ID>
+                    <animateTransform id="t1" attributeName="transform" type="rotate" from="0 130 85" to="2.5 130 85" dur=".1s" begin="ID.mouseover" />
+                    <animateTransform id=t2 attributeName="transform" type="rotate" from="2.5 130 85" to="-1.3 130 85" dur=".1s" begin="t1.end"/>
+                    <animateTransform attributeName="transform" type="rotate" from="-1.3 130 85" to="0 130 85" dur=".05s" begin="t2.end" />
+                </image>
+                <image href="assets/compu.png" height=131 width=242.5 x=219 id="compu">
+                    <animateTransform id="a1" attributeName="transform" type="rotate" from="0 340 0" to="2.5 340 0" dur=".1s" begin="compu.mouseover" />
+                    <animateTransform id=a2 attributeName="transform" type="rotate" from="2.5 340 0" to="-1.3 340 0" dur=".1s" begin="a1.end" />
+                    <animateTransform attributeName="transform" type="rotate" from="-1.3 340 0" to="0 340 0" dur=".05s" begin="a2.end" />
+                </image>
+                <image href="assets/plat_exp.png" height=97 width=89 y=150 x=320 id="plat_exp">
+                    <animateTransform id="b1" attributeName="transform" type="rotate" from="0 364 150" to="2.5 364 150" dur=".1s" begin="plat_exp.mouseover" />
+                    <animateTransform id=b2 attributeName="transform" type="rotate" from="2.5 364 150" to="-1.3 364 150" dur=".1s" begin="b1.end" />
+                    <animateTransform attributeName="transform" type="rotate" from="-1.3 364 150" to="0 364 150" dur=".05s" begin="b2.end" />
+                </image>
+            </svg>
+        </div>
+    </div>
+    <div class=present>
+        <h1>Où nous en sommes</h1>
+        <br><br><br>
+        <div>
+            <ul>
+                <li>Simulation de l'ordinateur
+                    <ul>
+                        <li>Fichiers, Emails</li>
+                        <li>A créer les énigmes</li>
+                    </ul>
+                </li>
+                <li>
+                    Platformer
+                    <ul>
+                        <li>Système de carte</li>
+                        <li>Physiques de base</li>
+                    </ul>
+                </li>
+                <br>
+                <li>
+                    Ce qu'il reste à faire
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class=present>
+        <h1>Structure du programme</h1>
+        <br><br>
+        <object data="assets/structure.svg"></object>
+    </div>
+    <script>
+        const presents = [...document.querySelectorAll('.present')]
+        var stopAnimation = false;
+        var index = 0;
+        const steps = [
+            () => { stopAnimation = true; svg.style.display = 'none'; presents[0].style.display = 'unset' },
+            () => { presents[0].style.display = 'none'; presents[1].style.display = 'unset' },
+            () => { presents[1].style.display = 'none'; presents[2].style.display = 'unset' }
+        ]
+        const countersteps = [
+            () => { stopAnimation = false; f(); svg.style.display = 'unset'; presents[0].style.display = 'none' },
+            () => { presents[0].style.display = 'unset'; presents[1].style.display = 'none' },
+            () => { presents[1].style.display = 'unset'; presents[2].style.display = 'none' }
+        ]
+        function next() {
+            if (index < steps.length) {
+                steps[index]();
+                index++
+            }
+        }
+        function pre() {
+            if (index > 0) {
+                index--
+                countersteps[index]();
+            }
+        }
+        onkeydown = ({ key }) => {
+            if (key === "ArrowLeft") pre()
+            else if (key === "ArrowRight") next()
+            // console.log(index)
+        }
+        setTimeout(next, 100)
+    </script>
+    <script>
+        const svg = document.querySelector('svg');
+        const back = svg.children[0];
+        class SVGel {
+            constructor(tag, attributes = {}) {
+                back.insertAdjacentHTML('beforeend', `<${tag} id="newsvgel" />`);
+                this.e = back.querySelector('#newsvgel');
+                this.e.removeAttribute('id');
+                this.setAttributes(attributes)
+            }
+            setAttributes(dict) {
+                for (let i in dict) this.e.setAttribute(i, dict[i]);
+            }
+        }
+        function addZeroes(s, n = 2) {
+            while (s.length < n) s = '0' + s;
+            return s;
+        }
+        const drawimage = () => {
+            new SVGel('image', { href: 'assets/Logo_Sphere.png', height: r / 2.5, x: -r / 5, y: -r / 5, width: r / 2.5 });
+        }
+
+        const r = 100;
+
+        perspective_index = 70
+
+        const sumArray = a => a.reduce((s, p) => s + p);
+        const multiply_3Dmatrices = (m1, m2) => [0, 1, 2].map(i => [0, 1, 2].map(j => sumArray([0, 1, 2].map(k => m1[i][k] * m2[k][j]))));
+        function rotationMatrix(R) {
+            const [[cx, sx], [cy, sy], [cz, sz]] = R;
+            return [[cy * cz, sx * sy * cz - cx * sz, cx * sy * cz + sx * sz], [cy * sz, sx * sy * sz + cx * cz, cx * sy * sz - sx * cz], [-sy, sx * cy, cx * cy]];
+        }
+
+        class Point {
+            constructor(x, y, z) {
+                this.pos = [x, y, z]
+                this.updateDrawPosition()
+            }
+            rotate(R) {
+                const [[cx, sx], [cy, sy], [cz, sz]] = R;
+                const k = this.pos[2] * cx + this.pos[1] * sx;
+                const l = this.pos[0] * cy + k * sy;
+                const m = this.pos[1] * cx - this.pos[2] * sx;
+                this.pos = [l * cz - m * sz, m * cz + l * sz, k * cy - this.pos[0] * sy];
+                this.updateDrawPosition();
+            }
+            applyMatrixRotation(matrix) {
+                this.pos = [0, 1, 2].map(i => sumArray([0, 1, 2].map(j => this.pos[j] * matrix[i][j])));
+                this.updateDrawPosition();
+            }
+            applyPerspective() {
+                this.persp_coef = 2 ** (this.pos[2] / perspective_index)
+                return [this.pos[0] * this.persp_coef, this.pos[1] * this.persp_coef]
+            }
+            updateDrawPosition() {
+                this.draw_position = this.applyPerspective()
+            }
+        }
+        class Trait {
+            static dimension = 2 * r;
+            static color = [255, 255, 255];
+            constructor(point1, point2) {
+                this.A = point1;
+                this.B = point2;
+                this.update();
+                this.el = new SVGel('line');
+            }
+            update() {
+                this.z_index = (this.A.pos[2] + this.B.pos[2]) / 2
+                const coef = Math.max(Math.min(this.z_index / Trait.dimension + .5 * 1.5, 1), 0)
+                this.color = Trait.color.map(e => e * coef);
+                this.marker_width = coef;
+            }
+            display() {
+                this.el = new SVGel('line', {
+                    stroke: '#' + this.color.map(e => addZeroes(Math.round(e).toString('16'))).join(''),
+                    x1: this.A.draw_position[0],
+                    y1: this.A.draw_position[1],
+                    x2: this.B.draw_position[0],
+                    y2: this.B.draw_position[1],
+                    'stroke-width': this.marker_width
+                })
+            }
+        }
+
+        class Planet {
+            constructor(lon = 20, lat = 10, r = r, type = [1, 1, 0, 0]) {
+                this.r = r
+                this.d = [lon + 1, lat + 1]
+                this.mat = new Array(this.d[0]).fill(0).map((e, i) =>
+                    new Array(this.d[1]).fill(0).map((e, j) =>
+                        new Point(
+                            Math.cos((j / lat - .5) * Math.PI) * Math.cos((i / lon) * 2 * Math.PI) * r,
+                            Math.sin((j / lat - .5) * Math.PI) * r,
+                            Math.cos((j / lat - .5) * Math.PI) * Math.sin((i / lon) * 2 * Math.PI) * r
+                        )
+                    )
+                );
+                this.traits = [];
+                for (let i = 0; i < lon; i++)
+                    for (let j = 0; j < lat; j++) {
+                        const A = this.mat[i][j];
+                        if (type[0]) {
+                            const B = this.mat[(i + 1) % this.d[0]][j]
+                            this.traits.push(new Trait(A, B))
+                        }
+                        if (type[1]) {
+                            const C = this.mat[i][(j + 1) % this.d[1]]
+                            this.traits.push(new Trait(A, C))
+                        }
+                        if (type[2]) {
+                            const D = this.mat[i + 1][j + 1]
+                            this.traits.push(new Trait(A, D))
+                        }
+                        if (type[3]) {
+                            const E = this.mat[i][j + 1]
+                            const F = this.mat[i + 1][j]
+                            this.traits.push(new Trait(E, F))
+                        }
+                    }
+                this.orientation_matrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+                this.request_display = true;
+            }
+            rotate(rotX, rotY, rotZ) {
+                if (rotX || rotY || rotZ) {
+                    const rot = [rotX, rotY, rotZ].map(e => [Math.cos(e), Math.sin(e)]);
+                    this.orientation_matrix = multiply_3Dmatrices(rotationMatrix(rot), this.orientation_matrix);
+                    this.mat.forEach(i => i.forEach(j => j.rotate(rot)));
+                    this.traits.forEach(i => i.update());
+                    this.request_display = true;
+                }
+            }
+            display() {
+                if (this.request_display) {
+                    this.request_display = false;
+                    var c = true;
+                    this.traits.sort((a, b) => a.z_index - b.z_index).forEach(t => {
+                        if (t.z_index > 0 && c) {
+                            c = false;
+                            drawimage();
+                        }
+                        t.display()
+                    });
+                }
+            }
+        }
+
+        planet = new Planet(20, 10, r / 3)
+
+        function f() {
+            back.innerHTML = '';
+            if (!stopAnimation) requestAnimationFrame(f);
+            planet.rotate(0, .002, 0);
+            planet.display();
+        }
+        f();
+
+    </script>
+</body>
+
+</html>
