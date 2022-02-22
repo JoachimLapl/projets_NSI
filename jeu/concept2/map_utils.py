@@ -66,6 +66,7 @@ class Wall:
             self.up = Vector.setToNorm(self.vp,1) #vecteur unitaire
         def radiusApplyWall(self, r:float):
             v = Vector.multiply(self.u,r)
+            print(Vector.multiply(Vector.add(self.p, v),.05), Vector.multiply(Vector.add(self.q, v),.05))
             return Wall.Line(Vector.add(self.p, v), Vector.add(self.q, v))
         def collides(self, segment:Segment):
             intersect = self.line.intersection(segment.line)

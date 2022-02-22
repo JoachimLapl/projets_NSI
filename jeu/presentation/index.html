@@ -52,6 +52,11 @@
         .present div>ul {
             font-size: 150%;
         }
+        .present p {
+            color:#555;
+            font-size: 125%;
+            font-family: Consolas;
+        }
     </style>
 </head>
 
@@ -119,17 +124,19 @@
     </div>
     <div class=present>
         <h1>Principales difficultés rencontrées</h1>
-        <br><br>
+        <br>
+        <p>Les positions et tailles relatives</p>
+        <br>
         <svg viewBox="0 0 950 105" style="height:min-content">
-            <text font-family="Consolas, 'Courier New', monospace" style="user-select:text">
+            <text font-family="Consolas, 'Courier New', monospace" style="user-select:text" id="mtxt">
                 <style>
                     .a{fill:#7b2cb3}
                     .b{fill:#a31515}
                     .c{fill:#09885a}
-                    *::selection{fill:#fff; background:#111}
-                    .a::selection{background:#7b2cb3}
-                    .b::selection{background:#a31515}
-                    .c::selection{background:#09885a}
+                    svg>text#mtxt *::selection{fill:#fff; background:#111}
+                    .a::selection{background:#7b2cb3 !important}
+                    .b::selection{background:#a31515 !important}
+                    .c::selection{background:#09885a !important}
                     .d{cursor:crosshair}
                 </style>
                 <tspan x=0 y=12>Opr.<tspan class=a>render_image</tspan>(<tspan class=b>'Assets/Icons/App Icons/Home_Button.png'</tspan>,(<tspan class=c>0</tspan>,<tspan class=c>88</tspan>*<tspan class=d>res1</tspan>),(<tspan class=c>11.25</tspan>*<tspan class=d>res1</tspan>,<tspan class=c>11.25</tspan>*<tspan class=d>res1</tspan>))</tspan>
@@ -141,6 +148,11 @@
             </text>
         </svg>
     </div>
+    <div class=present>
+        <h1>Principales difficultés rencontrées</h1>
+        <br><br>
+        <p>Problème de détection d'interaction</p>
+    </div>
     <script>
         const presents = [...document.querySelectorAll('.present')]
         var stopAnimation = false;
@@ -149,13 +161,15 @@
             () => { stopAnimation = true; svg.style.display = 'none'; presents[0].style.display = 'unset' },
             () => { presents[0].style.display = 'none'; presents[1].style.display = 'unset' },
             () => { presents[1].style.display = 'none'; presents[2].style.display = 'unset' },
-            () => { presents[2].style.display = 'none'; presents[3].style.display = 'unset' }
+            () => { presents[2].style.display = 'none'; presents[3].style.display = 'unset' },
+            () => { presents[3].style.display = 'none'; presents[4].style.display = 'unset' }
         ]
         const countersteps = [
             () => { stopAnimation = false; f(); svg.style.display = 'unset'; presents[0].style.display = 'none' },
             () => { presents[0].style.display = 'unset'; presents[1].style.display = 'none' },
             () => { presents[1].style.display = 'unset'; presents[2].style.display = 'none' },
-            () => { presents[2].style.display = 'unset'; presents[3].style.display = 'none' }
+            () => { presents[2].style.display = 'unset'; presents[3].style.display = 'none' },
+            () => { presents[3].style.display = 'unset'; presents[4].style.display = 'none' }
         ]
         function next() {
             if (index < steps.length) {
