@@ -5,6 +5,7 @@
    }
    .switch>*, .switch {
       pointer-events: all;
+      cursor: pointer;
    }
    .s1>*:hover{
       fill: #1af;
