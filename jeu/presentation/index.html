@@ -102,7 +102,6 @@
                 <li>Simulation de l'ordinateur
                     <ul>
                         <li>Fichiers, Emails</li>
-                        <li>A créer les énigmes</li>
                     </ul>
                 </li>
                 <li>
@@ -112,9 +111,57 @@
                         <li>Physiques de base</li>
                     </ul>
                 </li>
-                <br>
-                <li>
-                    Ce qu'il reste à faire
+            </ul>
+            <!--
+                Ce que nous avons fait:
+                    Ordi:
+                        simulation de l’ordinateur (messagerie, le gestionnaire de fichiers, appli note,) (A)
+                        création de toutes les interactions liées à la messagerie (M)
+                        système de coordonnées relatives (M)
+                    Platformer:
+                        la map fonctionne (J)
+                        les physiques de base du robot fonctionnent: (J)
+                        le châssis du robot
+                        les ressorts fonctionnent
+                        En cours de développement: 
+
+                Ce qu’il reste à faire:
+                    Histoire: 
+                        intégration du scénario dans le programme (écriture des mails, création des énigmes, création du système de checkpoint (MA?)
+                        finir d'intégrer l’histoire (MA?)
+                    Ordi:
+                        finir les différentes pages webs utiles pour la résolution de énigmes (MA?)
+                    Platformer:
+                        finir la map (M)
+                        l’interaction entre le sol et les roues (J)
+                        ajouter des images
+
+            -->
+        </div>
+    </div>
+    <div class=present>
+        <h1>Ce qu'il reste à faire</h1>
+        <br><br><br>
+        <div>
+            <ul>
+                <li>Histoire
+                    <ul>
+                        <li>Finir les énigmes</li>
+                        <li>intégration du scénario dans le programme</li>
+                        <li>finir d'intégrer l'histoire</li>
+                    </ul>
+                </li>
+                <li>Ordinateur
+                    <ul>
+                        <li>finir les différentes pages webs utiles pour la résolution de énigmes</li>
+                    </ul>
+                </li>
+                <li>Platformer
+                    <ul>
+                        <li>finir la map</li>
+                        <li>l'interaction entre le sol et les roues</li>
+                        <li>ajouter des images</li>
+                    </ul>
                 </li>
             </ul>
         </div>
@@ -165,14 +212,16 @@
             () => { presents[0].style.display = 'none'; presents[1].style.display = 'unset' },
             () => { presents[1].style.display = 'none'; presents[2].style.display = 'unset' },
             () => { presents[2].style.display = 'none'; presents[3].style.display = 'unset' },
-            () => { presents[3].style.display = 'none'; presents[4].style.display = 'unset' }
+            () => { presents[3].style.display = 'none'; presents[4].style.display = 'unset' },
+            () => { presents[4].style.display = 'none'; presents[5].style.display = 'unset' }
         ]
         const countersteps = [
             () => { stopAnimation = false; f(); svg.style.display = 'unset'; presents[0].style.display = 'none' },
             () => { presents[0].style.display = 'unset'; presents[1].style.display = 'none' },
             () => { presents[1].style.display = 'unset'; presents[2].style.display = 'none' },
             () => { presents[2].style.display = 'unset'; presents[3].style.display = 'none' },
-            () => { presents[3].style.display = 'unset'; presents[4].style.display = 'none' }
+            () => { presents[3].style.display = 'unset'; presents[4].style.display = 'none' },
+            () => { presents[4].style.display = 'unset'; presents[5].style.display = 'none' }
         ]
         function next() {
             if (index < steps.length) {
