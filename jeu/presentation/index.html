@@ -2,6 +2,8 @@
 <html>
 
 <head>
+    <title>Présentation Projet TAMED</title>
+    <meta charset="utf-8">
     <style>
         html,
         body {
@@ -138,6 +140,7 @@
                     .b::selection{background:#a31515 !important}
                     .c::selection{background:#09885a !important}
                     .d{cursor:crosshair}
+                    .d:hover{fill:#ff0}
                 </style>
                 <tspan x=0 y=12>Opr.<tspan class=a>render_image</tspan>(<tspan class=b>'Assets/Icons/App Icons/Home_Button.png'</tspan>,(<tspan class=c>0</tspan>,<tspan class=c>88</tspan>*<tspan class=d>res1</tspan>),(<tspan class=c>11.25</tspan>*<tspan class=d>res1</tspan>,<tspan class=c>11.25</tspan>*<tspan class=d>res1</tspan>))</tspan>
                 <tspan x=0 y=30>Opr.<tspan class=a>render_image</tspan>(<tspan class=b>'Assets/Icons/App Icons/Folder.png'</tspan>,(<tspan class=c>10</tspan>*<tspan class=d>res0</tspan>,<tspan class=c>87.5</tspan>*<tspan class=d>res1</tspan>),(<tspan class=c>12.5</tspan>*<tspan class=d>res1</tspan>,<tspan class=c>12.5</tspan>*<tspan class=d>res1</tspan>))</tspan>
@@ -214,7 +217,7 @@
 
         const r = 100;
 
-        perspective_index = 70
+        const perspective_index = 70
 
         const sumArray = a => a.reduce((s, p) => s + p);
         const multiply_3Dmatrices = (m1, m2) => [0, 1, 2].map(i => [0, 1, 2].map(j => sumArray([0, 1, 2].map(k => m1[i][k] * m2[k][j]))));
