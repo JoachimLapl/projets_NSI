@@ -195,10 +195,12 @@
         map = new Map()
         chassis = new Chassis(map);
 
-        (loop = () => {
+        loop = () => {
             requestAnimationFrame(loop)
             chassis.update()
-        })();
+            // console.log(chassis.p)
+        }
+        onclick=()=>{loop(); onclick=()=>void{}}
     </script>
 
 </body>
