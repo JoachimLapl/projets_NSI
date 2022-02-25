@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        html,
+        body,
+        svg {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <svg>
+        <g opacity="0">
+            <pattern id="grid" viewBox="-1 -1 2 2" patternUnits="userSpaceOnUse" height="1" width="1" x=-.5 y=-.5>
+                <rect height="2" width=2 x=-1 y=-1 fill=#fff />
+                <path d="M-1,0H1M0,-1V1" stroke="#000" stroke-width=".1" />
+            </pattern>
+        </g>
+        <rect width=150 height=100 fill="url(#grid)" id="background" />
+        <g id="content"></g>
+        <circle r=".25" fill="#f00" />
+    </svg>
+    <script>
+        const $ = (s, p = document) => p.querySelector(s);
+        const svg = $('svg');
+        const pattern = $('pattern', svg);
+        svg.background = $('#background', svg)
+        svg.content = $('#content', svg)
+        svg.pointer = $('circle', svg)
+        svg.v = [0, 0, 150, 100];
+        (svg.reset = function () {
+            this.setAttribute('viewBox', this.v.map(String).join(' '));
+            this.background.x.baseVal.value = this.v[0];
+            this.background.y.baseVal.value = this.v[1];
+        }.bind(svg))();
+        svg.getRealPosition = function (x, y) {
+            const rect = this.getBoundingClientRect();
+            var scale, a = rect.width / this.v[2], b = rect.height / this.v[3];
+            if (a < b) {
+                scale = a;
+                y -= (rect.height - this.v[3] * a) / 2;
+            } else {
+                scale = b;
+                x -= (rect.width - this.v[2] * b) / 2;
+            }
+            return [x, y].map((e,i) => e / scale + this.v[i])
+        }.bind(svg)
+        svg.onmousemove = function ({ x, y }) {
+            const [a, b] = this.getRealPosition(x, y).map(Math.round);
+            this.pointer.cx.baseVal.value = a;
+            this.pointer.cy.baseVal.value = b;
+        }.bind(svg);
+
+        class Map {
+            constructor(height = 250, width = 500, l = 1) {
+                this.path = new Path(this);
+                this.max = [width - svg.width, height - svg.height];
+                svg.activeMap = this;
+                svg.onclick = function ({ x, y }) {
+                    this.activeMap.path.addPoint(this.getRealPosition(x, y).map(Math.round))
+                }.bind(svg);
+                svg.onwheel = function ({shiftKey, deltaY, deltaX}) {
+                    if (shiftKey) deltaX+=deltaY;
+                    this.v[0] += deltaX
+                    this.v[1] += deltaY;
+                    this.reset()
+                }.bind(svg);
+                this.ptss = [];
+            }
+            newPath(){
+                this.ptss.push(this.path.pts);
+                this.path = new Path(this);
+                console.log(this.path)
+            }
+            saveData(){
+                const a = document.createElement('a');
+                a.href = 'data:text/plain;utf-8,'+encodeURIComponent(this.ptss.map(pts=>pts.map(pt=>pt.join()).join()).join(' '))
+                a.download = 'data.txt';
+                a.click()
+            }
+        }
+        class Path {
+            constructor(mp) {
+                svg.content.insertAdjacentHTML('beforeend', `<path id="newpath"/>`)
+                this.el = $('#newpath', svg.content);
+                this.el.removeAttribute('id');
+                this.pts = [];
+                this.el.style = "fill:#0003; stroke:#000; stroke-width:.2";
+                this.mp = mp;
+                this.el.oncontextmenu=function(e){
+                    e.preventDefault()
+                }
+            }
+            update() {
+                this.el.setAttribute('d', 'M ' + this.pts.map(pt => pt.join()).join(' '));
+            }
+            addPoint(pt) {
+                if (this.pts.length !== 0 && pt[0] === this.pts[0][0] && pt[1] === this.pts[0][1]) {
+                    this.el.style = "fill:#aaa";
+                    this.mp.newPath();
+                } else {
+                    this.pts.push(pt);
+                    this.update()
+                }
+            }
+        }
+        const mp = new Map()
+
+        onkeydown = function (e){
+            if (e.ctrlKey && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                mp.saveData()}
+        }
+    </script>
+
+</body>
+
+
+
+</html>
