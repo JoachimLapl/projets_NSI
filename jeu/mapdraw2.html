@@ -33,9 +33,9 @@
         const $ = (s, p = document) => p.querySelector(s);
         const svg = $('svg');
         const pattern = $('pattern', svg);
-        svg.background = $('#background', svg)
-        svg.content = $('#content', svg)
-        svg.pointer = $('circle', svg)
+        svg.background = $('#background', svg);
+        svg.content = $('#content', svg);
+        svg.pointer = $('circle', svg);
         svg.v = [0, 0, 150, 100];
         (svg.reset = function () {
             this.setAttribute('viewBox', this.v.map(String).join(' '));
