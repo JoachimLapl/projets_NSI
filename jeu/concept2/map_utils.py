@@ -142,15 +142,15 @@ class Wheel:
         walls = self.chassis.mp.getWithinWalls(self)
         walls1 = tuple((w.collides(seg), w) for w in walls)
         walls2 = tuple(w for w in walls1 if w[0] and w[1].closeToInterval(w[0]))
+        # if len(walls2)>1: print(len(walls2))
         if len(walls2)>0:
-            for w in sorted(walls2, key= lambda w: w[0]):
+            # oldW = None
+            # index = False
+            for w in sorted(walls2, key = lambda w: w[0]):
                 data = w[1].bounce(seg,w[0], self.bounciness)
-                # print(Vector.add(Vector.multiply(self.weight.v,5), data[1]),data[3])
-                # print(data[2], data[3])
-                # Vector.draw(Vector.multiply(data[3],self.chassis.mp.l/5),Vector.add(self.chassis.mp.t,Vector.multiply(self.pos,self.chassis.mp.l)),self.chassis.mp.l/40,0x0000ff)
-                # Vector.draw(Vector.multiply(Vector.add(self.weight.v, data[1]),self.chassis.mp.l/5),Vector.add(self.chassis.mp.t,Vector.multiply(self.pos,self.chassis.mp.l)),self.chassis.mp.l/40,0xff00ff)
-                if Vector.isOpposite(Vector.add(Vector.multiply(self.weight.v,1), data[1]), data[3]):
-                    print('entered')
+                # index = True
+                # if oldW != None and oldW:
+                if Vector.isOpposite(Vector.add(self.weight.v, data[1]), data[3]):
                     self.vector = Vector.multiply(data[2],data[4])
                     self.pos = Vector.add(Vector.subtract(w[0],Vector.multiply(data[3],-.0005)),self.vector)
                 else:

@@ -11,7 +11,7 @@ with open('images.txt') as f:
         s = i.split(',')
         images[float(s[1])]=s[0]
 print(images)
-with open('data2.txt') as f:
+with open('data4.txt') as f:
     carte = mp.Carte(
         tuple(
             map(

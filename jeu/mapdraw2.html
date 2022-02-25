@@ -27,6 +27,7 @@
         </g>
         <rect width=150 height=100 fill="url(#grid)" id="background" />
         <g id="content"></g>
+        <path d="M-150,0H150M0,-100V100" stroke=".3" />
         <circle r=".25" fill="#f00" />
     </svg>
     <script>
@@ -52,7 +53,7 @@
                 scale = b;
                 x -= (rect.width - this.v[2] * b) / 2;
             }
-            return [x, y].map((e,i) => e / scale + this.v[i])
+            return [x, y].map((e, i) => e / scale + this.v[i])
         }.bind(svg)
         svg.onmousemove = function ({ x, y }) {
             const [a, b] = this.getRealPosition(x, y).map(Math.round);
@@ -68,22 +69,22 @@
                 svg.onclick = function ({ x, y }) {
                     this.activeMap.path.addPoint(this.getRealPosition(x, y).map(Math.round))
                 }.bind(svg);
-                svg.onwheel = function ({shiftKey, deltaY, deltaX}) {
-                    if (shiftKey) deltaX+=deltaY;
+                svg.onwheel = function ({ shiftKey, deltaY, deltaX }) {
+                    if (shiftKey) deltaX += deltaY;
                     this.v[0] += deltaX
                     this.v[1] += deltaY;
                     this.reset()
                 }.bind(svg);
                 this.ptss = [];
             }
-            newPath(){
+            newPath() {
                 this.ptss.push(this.path.pts);
                 this.path = new Path(this);
                 console.log(this.path)
             }
-            saveData(){
+            saveData() {
                 const a = document.createElement('a');
-                a.href = 'data:text/plain;utf-8,'+encodeURIComponent(this.ptss.map(pts=>pts.map(pt=>pt.join()).join()).join(' '))
+                a.href = 'data:text/plain;utf-8,' + encodeURIComponent(this.ptss.map(pts => pts.map(pt => pt.join()).join()).join(' '))
                 a.download = 'data.txt';
                 a.click()
             }
@@ -96,7 +97,7 @@
                 this.pts = [];
                 this.el.style = "fill:#0003; stroke:#000; stroke-width:.2";
                 this.mp = mp;
-                this.el.oncontextmenu=function(e){
+                this.el.oncontextmenu = function (e) {
                     e.preventDefault()
                 }
             }
@@ -112,13 +113,21 @@
                     this.update()
                 }
             }
+            removeLast() {
+                this.pts.pop();
+                this.update();
+            }
         }
         const mp = new Map()
 
-        onkeydown = function (e){
+        onkeydown = function (e) {
             if (e.ctrlKey && e.key.toLowerCase() === 's') {
                 e.preventDefault();
-                mp.saveData()}
+                mp.saveData();
+            }
+            if (e.key === "Backspace") {
+                mp.path.removeLast();
+            }
         }
     </script>
 
