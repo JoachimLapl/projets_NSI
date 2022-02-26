@@ -19,15 +19,20 @@
 
 <body>
     <svg>
-        <g opacity="0">
+        <defs>
             <pattern id="grid" viewBox="-1 -1 2 2" patternUnits="userSpaceOnUse" height="1" width="1" x=-.5 y=-.5>
                 <rect height="2" width=2 x=-1 y=-1 fill=#fff />
                 <path d="M-1,0H1M0,-1V1" stroke="#000" stroke-width=".1" />
             </pattern>
-        </g>
+            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4"
+                orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill=#0f0 />
+            </marker>
+        </defs>
         <rect width=150 height=100 fill="url(#grid)" id="background" />
         <g id="content"></g>
-        <path d="M-150,0H150M0,-100V100" stroke=".3" />
+        <g id="vectors" stroke="#0f0" fill="#0f0" stroke-width=".5" marker-end="url(#arrow)" display="none"></g>
+        <path d="M-150,0H150M0,-100V100" stroke="#000" stroke-width=".3" id="rep" />
         <circle r=".25" fill="#f00" />
     </svg>
     <script>
@@ -36,12 +41,15 @@
         const pattern = $('pattern', svg);
         svg.background = $('#background', svg);
         svg.content = $('#content', svg);
+        svg.vectors = $('#vectors', svg);
         svg.pointer = $('circle', svg);
         svg.v = [0, 0, 150, 100];
+        svg.rep = $('#rep', svg);
         (svg.reset = function () {
             this.setAttribute('viewBox', this.v.map(String).join(' '));
             this.background.x.baseVal.value = this.v[0];
             this.background.y.baseVal.value = this.v[1];
+            svg.rep.setAttribute('d', `M${this.v[0]},0h${this.v[2]}M0,${this.v[1]}v${this.v[3]}`);
         }.bind(svg))();
         svg.getRealPosition = function (x, y) {
             const rect = this.getBoundingClientRect();
@@ -61,26 +69,58 @@
             this.pointer.cy.baseVal.value = b;
         }.bind(svg);
 
+        class Vector {
+            static add(...v) {
+                return v[0].map((e, i) => v.map(a => a[i]).reduce((s, p) => s + p));
+            }
+            static subtract(v, u) {
+                return v.map((e, i) => e - u[i]);
+            }
+            static multiply(v, n) {
+                return v.map(e => e * n);
+            }
+            static opposite(v) {
+                return [-v[1], v[0]];
+            }
+            static getNorm(v) {
+                return v.map(e => e ** 2).reduce((s, p) => s + p) ** .5;
+            }
+        }
+
+        var random = 2;
+        var d = 5;
+
         class Map {
             constructor(height = 250, width = 500, l = 1) {
                 this.path = new Path(this);
                 this.max = [width - svg.width, height - svg.height];
                 svg.activeMap = this;
-                svg.onclick = function ({ x, y }) {
-                    this.activeMap.path.addPoint(this.getRealPosition(x, y).map(Math.round))
+                svg.onclick = function ({ x, y, altKey }) {
+                    this.activeMap.path.addPoint(this.getRealPosition(x, y).map(Math.round), altKey)
                 }.bind(svg);
                 svg.onwheel = function ({ shiftKey, deltaY, deltaX }) {
-                    if (shiftKey) deltaX += deltaY;
+                    if (Math.abs(deltaY) === 150) deltaY /= 10
+                    if (shiftKey) { deltaX += deltaY; deltaY = 0; }
                     this.v[0] += deltaX
                     this.v[1] += deltaY;
                     this.reset()
                 }.bind(svg);
                 this.ptss = [];
+                this.paths = [];
+                this.vectorEl = [];
             }
             newPath() {
+                this.vectorEl = [];
                 this.ptss.push(this.path.pts);
                 this.path = new Path(this);
                 console.log(this.path)
+            }
+            newVector(p, q) {
+                const center = Vector.multiply(Vector.add(p, q), .5);
+                const v = Vector.multiply(Vector.opposite(Vector.subtract(p, q)), .5);
+                svg.vectors.insertAdjacentHTML('beforeend', `<path d="m${center.join()} ${v.join()}" id="newvector"/>`);
+                this.vectorEl.push($('#newvector', svg));
+                this.vectorEl[this.vectorEl.length - 1].removeAttribute('id');
             }
             saveData() {
                 const a = document.createElement('a');
@@ -100,33 +140,69 @@
                 this.el.oncontextmenu = function (e) {
                     e.preventDefault()
                 }
+                this.vectorEl = [];
             }
             update() {
                 this.el.setAttribute('d', 'M ' + this.pts.map(pt => pt.join()).join(' '));
+                this.el.oncontextmenu = function (e) {
+                    e.preventDefault()
+                    console.log(e)
+                }.bind(this.el);
             }
-            addPoint(pt) {
-                if (this.pts.length !== 0 && pt[0] === this.pts[0][0] && pt[1] === this.pts[0][1]) {
-                    this.el.style = "fill:#aaa";
-                    this.mp.newPath();
+            addPoint(pt, rocky = false) {
+                if (this.pts.length === 0) {
+                    this.pts = [pt];
                 } else {
-                    this.pts.push(pt);
-                    this.update()
+                    const q = this.pts[this.pts.length - 1];
+                    const v = Vector.subtract(pt, q);
+                    const n = rocky ? Math.round(Vector.getNorm(v) / d) : 1;
+                    for (let i = 1; i < n + 1; i++) {
+                        const nP = Vector.add(q, Vector.multiply(v, i / n)).map(e=>e+(Math.random()*2-1)*random).map(Math.round);
+                        this.pts.push(nP);
+                        this.mp.newVector(nP, this.pts[this.pts.length - 1]);
+                    }
+                    if (this.pts.length !== 1 && pt[0] === this.pts[0][0] && pt[1] === this.pts[0][1]) {
+                        this.pts.pop();
+                        this.el.style = "fill:#aaa";
+                        this.mp.newPath();
+                    }
                 }
+                this.update()
             }
             removeLast() {
                 this.pts.pop();
+                this.mp.vectorEl.pop().remove();
                 this.update();
             }
         }
         const mp = new Map()
 
         onkeydown = function (e) {
-            if (e.ctrlKey && e.key.toLowerCase() === 's') {
-                e.preventDefault();
-                mp.saveData();
-            }
-            if (e.key === "Backspace") {
-                mp.path.removeLast();
+            if (e.ctrlKey) {
+                if (e.ctrlKey && e.key.toLowerCase() === 's') {
+                    e.preventDefault();
+                    mp.saveData();
+                } else if (e.key === "Backspace") {
+                    mp.path.pts = [];
+                    mp.path.update();
+                } else if (e.key === "e") {
+                    e.preventDefault();
+                    if (svg.vectors.areVisible) {
+                        svg.vectors.style.display = "none";
+                        svg.vectors.areVisible = false;
+                    } else {
+                        svg.vectors.style.display = "unset";
+                        svg.vectors.areVisible = true;
+                    }
+                } else if (e.key === "i") {
+                    e.preventDefault();
+                    random = Number(prompt("random", random))
+                    d = Number(prompt("rock_distance", d))
+                }
+            } else {
+                if (e.key === "Backspace") {
+                    mp.path.removeLast();
+                }
             }
         }
     </script>

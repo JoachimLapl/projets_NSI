@@ -11,7 +11,7 @@ with open('images.txt') as f:
         s = i.split(',')
         images[float(s[1])]=s[0]
 print(images)
-with open('data4.txt') as f:
+with open('data6.txt') as f:
     carte = mp.Carte(
         tuple(
             map(
@@ -33,9 +33,9 @@ block = mp.Block(((0,0),(1,-1),(0,-2),(-2,-1),(-1,2),(1,3)))
 chassis = mp.Chassis(
     carte,
     (0,-50),
-    ((-20,0),(0,-10),(20,0)),
+    ((-20,-10),(0,-20),(20,-10)),
     20,
-    ((-5,5),(5,5),(-15,5),(15,5))
+    ((-5,-5),(5,-5),(-15,-5),(15,-5))
 )
 
 # chassis = mp.Chassis((0,-10),((-3,0),(3,0),(0,-2)), ((-3,1),(0,1),(3,1)),1) # position, path, wheels_pos, wheels_rad, spring_elas=.5

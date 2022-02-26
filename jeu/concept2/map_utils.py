@@ -314,7 +314,7 @@ class AttachPoint:
         self.vector = self.wheel.weight.v
         self.nextpos = self.pos
     def update(self, keys):
-        self.wheel.update(keys[pygame.K_LEFT],keys[pygame.K_RIGHT])
+        self.wheel.update(*((0,0) if keys[pygame.K_UP] else (keys[pygame.K_LEFT],keys[pygame.K_RIGHT])))
         v = Vector.subtract(self.wheel.pos, self.pos)
         h = log(Vector.getNorm(v))
         s = log(h)*self.elas if h>1 else 0
@@ -405,3 +405,13 @@ class Chassis:
         Vector.draw(self.vector, Vector.add(self.p,self.mp.t), 1, 0x00ff00)
 
 
+class Polygon:
+    def __init__(self, path):
+        self.path = path
+        self.p = Vector.multiply(Vector.add(*path),1/len(path))
+        self.orientation = 1,0
+        self.weight = Weight(self.p)
+    def update(self):
+        pass
+    def draw(self, c=0xff):
+        pygame.draw.polygon(screen, c, tuple(map(lambda pt: Vector.add(self.p, Vector.rotate(pt, self.orientation)),self.path)))
