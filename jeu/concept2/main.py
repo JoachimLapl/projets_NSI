@@ -11,7 +11,7 @@ with open('images.txt') as f:
         s = i.split(',')
         images[float(s[1])]=s[0]
 print(images)
-with open('data7.txt') as f:
+with open('data.txt') as f:
     carte = mp.Carte(
         tuple(
             map(
@@ -20,7 +20,7 @@ with open('data7.txt') as f:
             )
         ),
         (5,10),
-        mi/100,
+        mi/10,
         images
     )
 print(carte.points)
@@ -53,12 +53,12 @@ while RUN:
     # chassis.update()
     carte.relative = chassis.p
     # chassis.draw()
-    for b in carte.radBlocks[chassis.w_r]:
-        for w in b.walls:
-            w.draw(Vector.subtract(carte.center,carte.relative), 1)
+    # for b in carte.radBlocks[chassis.w_r]:
+    #     for w in b.walls:
+    #         w.draw(Vector.subtract(carte.center,carte.relative), 1)
     carte.draw()
-    for v in mp.vectors:
-        Vector.draw(v[0], Vector.add(Vector.subtract(carte.center, carte.relative),Vector.multiply(v[1],carte.l)),1, 0xff0000)
+    # for v in mp.vectors:
+    #     Vector.draw(v[0], Vector.add(Vector.subtract(carte.center, carte.relative),Vector.multiply(v[1],carte.l)),1, 0xff0000)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             RUN = False

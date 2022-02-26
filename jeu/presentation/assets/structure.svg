@@ -29,7 +29,7 @@
       <rect x="134.37576" y="0" width="67.187881" height="10.065856" />
       <rect x="201.56363" y="0" width="67.187881" height="10.065856" />
    </g>
-   <g fill="#fff" class="switch s2">
+   <g fill="none" class="switch s2">
       <rect x="0" y="10.066146" height="10.065856" width="67.187881"/>
       <rect x="0" y="20.132002" height="10.065856" width="67.187881"/>
       <rect x="0" y="30.197859" height="10.065856" width="67.187881"/>
