@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <meta chraset="utf-8">
     <style>
         html,
         body,
@@ -156,15 +157,16 @@
                     const q = this.pts[this.pts.length - 1];
                     const v = Vector.subtract(pt, q);
                     const n = rocky ? Math.round(Vector.getNorm(v) / d) : 1;
-                    for (let i = 1; i < n + 1; i++) {
+                    for (let i = 1; i < n; i++) {
                         const nP = Vector.add(q, Vector.multiply(v, i / n)).map(e=>e+(Math.random()*2-1)*random).map(Math.round);
                         this.pts.push(nP);
                         this.mp.newVector(nP, this.pts[this.pts.length - 1]);
                     }
                     if (this.pts.length !== 1 && pt[0] === this.pts[0][0] && pt[1] === this.pts[0][1]) {
-                        this.pts.pop();
                         this.el.style = "fill:#aaa";
                         this.mp.newPath();
+                    }else{
+                        this.pts.push(pt)
                     }
                 }
                 this.update()
@@ -205,6 +207,8 @@
                 }
             }
         }
+        alert("Mathis, tu peux faire un `rocky ground` automatiquement en appuyant sur 𝑎𝑙𝑡 lorsque tu crées la map")
+        alert("Et tu peux changer les paramètres du rocky ground en appuyant sur ctrl+e")
     </script>
 
 </body>
