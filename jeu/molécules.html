@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style></style>
+</head>
+
+<body>
+    <svg xmlns="https://www.w3.org/2000/svg">
+        <defs>
+            <radialGradient id="gradient0" cx="75%" cy="25%">
+                <stop offset="10%" stop-color="#fff" />
+                <stop offset="95%" stop-color="#00f" />
+            </radialGradient>
+            <radialGradient id="gradient1" cx="75%" cy="25%">
+                <stop offset="10%" stop-color="#fff" />
+                <stop offset="95%" stop-color="#aaa" />
+            </radialGradient>
+            <radialGradient id="gradient2" cx="75%" cy="25%">
+                <stop offset="10%" stop-color="#fff" />
+                <stop offset="95%" stop-color="#000" />
+            </radialGradient>
+            <radialGradient id="gradient3" cx="75%" cy="25%">
+                <stop offset="10%" stop-color="#fff" />
+                <stop offset="95%" stop-color="#f00" />
+            </radialGradient>
+            <radialGradient id="gradient4" cx="75%" cy="25%">
+                <stop offset="10%" stop-color="#fff" />
+                <stop offset="95%" stop-color="#0a0" />
+            </radialGradient>
+        </defs>
+    </svg>
+    <script>
+        const svg = document.querySelector('svg');
+        const ix = 10, iy = 10, r = 4;
+        const sizeX = Number(prompt("sizeX",10)||10), sizeY = Number(prompt("sizeY",10)||10);
+        for (let i = 0; i < sizeX; i++) {
+            for (let j = 0; j < sizeY; j++) {
+                svg.insertAdjacentHTML('beforeend', `<circle cx=${(i + .5) * ix} cy=${(j + .5) * iy} r=${r} fill=url(#gradient${Math.floor(Math.random()*5)}) />`)
+            }
+        }
+        svg.setAttribute('viewBox', `0 0 ${sizeX*ix} ${sizeY*iy}`);
+        onkeydown = e=>{
+            const {ctrlKey,key} = e;
+            if(ctrlKey && key.toLowerCase()==='s'){
+                e.preventDefault()
+                const a = document.createElement('a');
+                a.href = 'data:image/svg+xml;utf-8,'+encodeURIComponent(svg.outerHTML);
+                a.download = "molécules.svg";
+                a.click();
+            }
+        }
+    </script>
+</body>
+
+</html>
