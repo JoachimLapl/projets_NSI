@@ -11,7 +11,7 @@ with open('images.txt') as f:
         s = i.split(',')
         images[float(s[1])]=s[0]
 print(images)
-with open('data.txt') as f:
+with open('data7.txt') as f:
     carte = mp.Carte(
         tuple(
             map(
@@ -20,7 +20,7 @@ with open('data.txt') as f:
             )
         ),
         (5,10),
-        mi/10,
+        mi/100,
         images
     )
 print(carte.points)
