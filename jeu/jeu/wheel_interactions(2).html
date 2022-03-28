@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        html,
+        body,
+        svg {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            /*display: flex;*/
+            align-items: center;
+            justify-content: center;
+        }
+
+        svg {
+            height: 100vmin;
+            width: 100vmin;
+        }
+
+        /* circle {
+            fill: #000;
+        } */
+
+        line {
+            stroke: #000;
+        }
+
+        #orienration {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <svg viewBox="-5 -5 350 350"></svg>
+    <script>
+        const $ = (s, p = document) => p.querySelector(s);
+        const svg = $('svg');
+        const p2 = Math.PI / 2
+
+        const map = [
+            [0, 1, 1, 0],
+            [1, 1, 0, 0],
+            [1, 1, 0, 0],
+            [1, 1, 1, 0]
+        ];
+        x = 0
+        y = 0
+        function SVGElement(n, v) {
+            this.e = document.createElementNS("http://www.w3.org/2000/svg", n);
+            for (let p in v) this.e.setAttributeNS(null, p, v[p]);
+            return this.e
+        }
+        // function changeToFunctions(a, s, S) {
+        //     const arr = [[]];
+        //     a.forEach((b, i) => {
+        //         if (b && a[i % 4])
+        //             arr[arr.length - 1].push(i);
+        //         else arr.push([])
+        //     })
+        //     S /= 2
+        //     const t = [[S, S], [-S, S], [-S, -S], [S, -S]];
+        //     // console.log(arr.filter(e => e.length))
+        //     return arr.filter(e => e.length).forEach(e => addVectors(...e.map(i=>t[i])))
+        // };
+        const mid_point = (...p) => p.length && new Array(p[0].length).fill(0).map((e, i) => p.map(y => y[i]).reduce((a, b) => a + b)).map(e => e / p.length)
+        const get_vector = (...p) => p.length && new Array(p[0].length).fill(0).map((e, i) => p.map(y => y[i]).reduce((a, b) => a + b))
+        for (let i of [0, 1])
+            for (let j of [0, 1])
+                for (let k of [0, 1])
+                    for (let l of [0, 1]) {
+                        [[0, 0, i], [1, 0, j], [1, 1, k], [0, 1, l]].forEach(([ox, oy, a]) => svg.appendChild(new SVGElement('circle', { cx: x * 100 + ox * 40, cy: y * 100 + oy * 40, r: 2, fill: a ? '#f00' : '#000' })));
+                        const point = mid_point(...[i ? [0, 0] : 0, j ? [1, 0] : 0, k ? [1, 1] : 0, l ? [0, 1] : 0].filter(e => e));
+                        const vector = get_vector(...[i ? [.25, .25] : 0, j ? [-.25, .25] : 0, l ? [.25, -.25] : 0, k ? [-.25, -.25] : 0].filter(e => e));
+                        console.log(point)
+                        console.log(vector)
+                        point && svg.appendChild(new SVGElement('circle', { cx: x * 100 + point[0] * 40, cy: y * 100 + point[1] * 40, r: 1.5, fill: '#00f' }));
+                        point && vector && svg.appendChild(new SVGElement('line', { x1: x * 100 + point[0] * 40, y1: y * 100 + point[1] * 40, x2: x * 100 + (point[0] + vector[0]) * 40, y2: y * 100 + (point[1] + vector[1]) * 40, stroke: '#0f0' }));
+                        x++
+                        if (x === 4) y++, x = 0;
+                    }
+
+        [
+            [[[-.5, -.5]], [[.5, .5]], [[.5, .5]]]
+        ]
+    </script>
+
+</body>
+
+
+
+</html>

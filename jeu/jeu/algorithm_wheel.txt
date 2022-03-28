@@ -1,0 +1,58 @@
+créer une variable `point` qui contient la position de `wheel`
+créer une variable `vector` qui contient le vecteur de `wheel`
+créer une constante `map` qui contient la map assignée à `wheel`
+
+tant que Vrai :
+    mettre les cases de la map par lesquelles passe le vecteur `vector` partant du point `point` dans l'ordre dans une constante `cases`
+    créer une constante `droite` en lui donnant un objet `Droite`, créée à partir du point et du vecteur
+    créer une variable `mur`
+    pour chaque case de `cases`:
+        mettre dans une variable `murs` les murs associés à la case
+        filtrer les murs pour ne conserver que ceux dont le vecteur est opposé à `vector`
+        ajouter l'intersection entre chaque mur et la droite `droite`
+        filtrer les murs pour ne conserver que ceux dont l'intersection est à l'intérieur de l'intervalle défini par la case
+        si la taille de la liste `murs` est supérieure à 0:
+            arranger les murs de sorte à ce que le mur le plus proche soit en prémière position et que le mur le plus loin soit en dernière position
+            mettre la variable `mur` au premier élément de la liste `murs`
+            sortir de la boucle
+    si la variable `mur` n'est pas définie:
+        sortir de la boucle
+    créer une constante `nouveau_point` en lui donnant le point d'intersection entre le mur `mur` et la trajectoire du point `droite` 
+    changer la varibale `vector` en fonction du vecteur du `mur` et de la distance où se trouve le point issu de la translation de `point` par le vecteur `vector` partant du point `nouveau_point` en fonction du type du mur pour savoir s'il est slippery et en fonction de la rotation de la `wheel`
+    mettre la variable `point` à `nouveau_point`
+
+changer la position de `wheel` en ajoutant `point` et `vector`
+changer le vector de `wheel`
+
+
+
+
+
+var point = wheel.pos;
+var vector = wheel.vec;
+const map = wheel.map;
+
+while (true) {
+    const cases = map.vectorCases(point, vector);
+    const droite = new Droite.Point_Vector(point, vector);
+    var mur;
+    for (let case of cases) {
+        # mettre dans une variable `murs` les murs associés à la case
+        murs = murs.filter(mur => vector.isOpposite(mur.vector))
+                .map(mur => [mur, droite.intersection(mur.line)])
+                .filter(mur => mur[1][0] > case[0] && mur[1][0] < case[0]+1 && mur[1][1] > case[1] && mur[1][1] < case[1]+1);
+        if (murs.length === 1) {
+            mur = murs[0];
+            break;
+        }
+    }
+    if (!mur) {
+        break;
+    }
+    const nouveau_point = mur[1];
+    # changer la varibale `vector` en fonction du vecteur du `mur` et de la distance où se trouve le point issu de la translation de `point` par le vecteur `vector` partant du point `nouveau_point`
+    point = nouveau_point;
+}
+
+wheel.setPos(add_vectors(point, vector))
+wheel.setVector(vector)

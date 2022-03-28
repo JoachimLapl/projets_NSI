@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        div {
+            display: grid;
+            grid-template-columns: auto auto auto auto;
+            width: min-content;
+        }
+
+        svg {
+            width: 100vmin;
+            height: 100vmin;
+        }
+
+        /* line {
+            stroke: #ff0;
+        } */
+    </style>
+</head>
+
+<body>
+    <svg>
+        <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6"
+                orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" />
+            </marker>
+        </defs>
+    </svg>
+    <!-- <script src="math_utils.js" type="module"></script>
+    <script src="map_utils2.js" type="module"></script>
+    <script type="module">
+        //@ts-check
+        const svg = document.querySelector('svg')
+
+        // const map = new MAP(new Array(100).fill(0).map(e=>new Array(100).fill(0).map(e=>Number(Math.random()>.5)).join('')).join(','), 20, svg);
+        const map = new MAP('00000,00000,10000,11011,11111', 20, svg);
+        const wheel = new Wheel([50, 50], 5);
+        wheel.vector = [0, 45]
+        const drt = new Droite.Point_Vector(Vector.add(wheel.pos, [-50, -50]), wheel.vector)
+        map.addWheel(wheel)
+        map.draw();
+        wheel.display();
+        drt.draw(svg, [-50, -50, 50, 50])
+        wheel.update()
+    </script> -->
+    <script src="map-try2_src.js" type="module"></script>
+
+</body>
+
+
+
+</html>

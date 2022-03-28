@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        svg {
+            height: 100vmin;
+            width: 100vmin;
+        }
+
+        #orient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            color: #444;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        #try {
+            fill: none;
+            stroke: #888;
+            stroke-width: .001;
+        }
+    </style>
+</head>
+
+<body>
+    <svg viewBox="0 0 1 1">
+        <path d="m 0,0 l 1,1 h -1 z" />
+        <circle r=.01 fill="#f00" id="point" />
+        <circle r=.01 fill="#f00" id="try" />
+        <line stroke="#00f" stroke-width=".005" />
+        <line id="try2" stroke="#ff0" stroke-width=".003" />
+        <line id="pushv" stroke="#ff0" stroke-width=".003" />
+    </svg>
+    <div id="orient">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+    <script>
+        const $ = (s, p = document) => p.querySelector(s);
+        const svg = $('svg');
+        const [circle, line, tr, tr2, pushv] = ['#point', 'line', '#try', '#try2', '#pushv'].map(e => $(e, svg));
+        const orient = $('#orient');
+        var x, y, v = [0, 0];
+        circle.cx.baseVal.value = x = .9;
+        circle.cy.baseVal.value = y = .1;
+
+        wall = [[0, 0], [Math.SQRT2, -Math.SQRT2]]
+        ln = [[0, 0], [1, 1]]
+        const vectorOpposite = (v, u) => {
+            orient.children[1].innerText = `${v} ${u}  \n${(v[0] + u[0]) ** 2 + (v[1] + u[1]) ** 2} < ${v[0] ** 2 + u[0] ** 2 + v[1] ** 2 + u[1] ** 2}`;
+            return (v[0] + u[0]) ** 2 + (v[1] + u[1]) ** 2 < v[0] ** 2 + u[0] ** 2 + v[1] ** 2 + u[1] ** 2
+        };
+        const distanceFromLine = (p, l) => {
+            svy = l[1][1] ** 2;
+            svx = l[1][0] ** 2;
+            a = (svx * p[0] + svy * l[0][0] + l[1][0] * l[1][1] * (p[1] - l[0][1])) / (svy + svx)
+            b = l[1][1] ? -l[1][0] / l[1][1] * (a - p[0]) + p[1] : l[1][1] / l[1][0] * (a - l[0][0]) + l[0][1]
+            return Math.hypot(a - p[0], b - p[1])
+        }; // `l` defined by 1 point and 1 vector: [p,v]
+        const distanceLineLine = (L1, L2) => {
+            const a = L2[1][0], b = -L2[1][1], c = L2[1][0] * L2[0][1] - L2[1][1] * L2[0][0];
+            const d = L1[1][0], e = -L1[1][1], f = L1[1][0] * L1[0][1] - L1[1][1] * L1[0][0];
+            const g = b / e, h = a / d;
+            const i = (c - f * g) / (a - d * g), j = (c - f * h) / (b - e * h);
+            return Math.hypot(i - L1[0][0], j - L1[0][1])
+        }
+        const prevent_inside_coef = (v, r) => -(v[0] * r[0] + v[1] * r[1]) / (r[0] ** 2 + r[1] ** 2);
+
+        var min = Math.min(innerWidth, innerHeight)
+        onresize = () => min = Math.min(innerWidth, innerHeight);
+        svg.ondblclick = ({ offsetX, offsetY }) => {
+            line.x1.baseVal.value = circle.cx.baseVal.value = x = offsetX / min;
+            line.y1.baseVal.value = circle.cy.baseVal.value = y = offsetY / min;
+            tr2.x1.baseVal.value = circle.cx.baseVal.value = x = offsetX / min;
+            tr2.y1.baseVal.value = circle.cy.baseVal.value = y = offsetY / min;
+        }
+        svg.onmousemove = ({ offsetX, offsetY }) => {
+            v = [offsetX / min - x, offsetY / min - y]
+            const size = Math.hypot(...v);
+            pushv.x1.baseVal.value = line.x2.baseVal.value = v[0] + x;
+            pushv.y1.baseVal.value = line.y2.baseVal.value = v[1] + y;
+            orient.children[0].innerText = vectorOpposite(wall[1], v);
+            if (vectorOpposite(wall[1], v)) {
+                tr.cx.baseVal.value = offsetX / min
+                tr.cy.baseVal.value = offsetY / min
+                tr.r.baseVal.value = distanceFromLine([offsetX / min, offsetY / min], ln)
+                const dist = distanceLineLine([[x, y], v], ln)
+                orient.children[2].innerText = dist
+                tr2.x2.baseVal.value = v[0] / size * dist + x;
+                tr2.y2.baseVal.value = v[1] / size * dist + y;
+                if (dist < size) {
+                    const c = (1 - dist / size)
+                    const inside_vector = v.map(e => e*c);
+                    const k = prevent_inside_coef(inside_vector, wall[1]);
+                    orient.children[3].innerText = k;
+                    pushv.x2.baseVal.value = k * wall[1][0] + v[0] + x;
+                    pushv.y2.baseVal.value = k * wall[1][1] + v[1] + y
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

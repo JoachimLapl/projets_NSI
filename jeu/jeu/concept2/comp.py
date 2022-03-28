@@ -1,9 +1,220 @@
-import pygame, time
-from math_utils import hypot, mp, sumTuple, Vector, Point, Droite, Circle, Segment, Force, Interval, Triangle
-from math import floor, pi, asin, sin, cos, log
-from variables import screen, resolution, mid_screen, mi
+import pygame
+from math import floor, pi, asin, acos, sin, cos, log
 
-vectors = []
+
+resolution = (500,500)
+mid_screen = tuple(i/2 for i in resolution)
+
+mi,ma = sorted(resolution)
+
+screen = pygame.display.set_mode(resolution)
+clock = pygame.time.Clock()
+
+pygame.font.init()
+fontName = pygame.font.get_default_font()
+font = pygame.font.SysFont(fontName, 23)
+def render_text(txt):
+    txt = font.render(txt, True, 0)
+    screen.blit(txt,(2,2))
+
+
+def sumTuple(t, callback = lambda x : x):
+    S = type(tuple(t)[0])()
+    for i in t:
+        S += callback(i)
+    return S
+
+def polynomial(a, b, c):
+    Delta = b ** 2 - 4 * a * c
+    if (Delta < 0): return ()
+    if (Delta == 0): return -b / a / 2,
+    Dsqrt = Delta**.5
+    return -(Dsqrt + b) / a / 2, (Dsqrt - b) / a / 2,
+
+def mp(itera, callback=lambda x,i:x):
+    return tuple(callback(itera[i],i) for i in range(len(itera)))
+
+def hypot(*v):
+    return sumTuple(v, lambda x : x ** 2) ** .5
+
+def removeDoublons(itera):
+    def getBool(j,e):
+        for k in range(j):
+            if itera[k][0] == e[0] and itera[k][1] == e[1]:
+                return False
+        return True
+    return tuple(itera[i] for i in range(len(itera)) if getBool(i, itera[i]))
+
+class Vector:
+    @classmethod
+    def add(cl,*v):
+        return tuple(map(lambda *a: sumTuple(a), *v))
+    @classmethod
+    def subtract(cl,v, u):
+        return v[0]-u[0],v[1]-u[1]
+    @classmethod
+    def multiply(cl,v, n):
+        return v[0]*n,v[1]*n
+    @classmethod
+    def Vmul(cl,v,u):
+        return v[0]*u[0],v[1]*u[1]
+    @classmethod
+    def isOpposite(cl,v, u, m = 0):
+        return sumTuple(Vector.add(v, u), lambda x : x ** 2) < sumTuple(v, lambda x : x ** 2) + sumTuple(u, lambda x : x ** 2) + m
+    @classmethod
+    def getNorm(cl,v):
+        return hypot(v[0], v[1])
+    @classmethod
+    def setToNorm(cl,v, s):
+        n = Vector.getNorm(v)
+        s = 0 if n == 0 else s/n
+        return Vector.multiply(v,s)
+    @classmethod
+    def getAngle(cl, v):
+        return acos(v[0]/Vector.getNorm(v)) if v[1]<0 else -acos(v[0]/Vector.getNorm(v))
+    @classmethod
+    def rotate(cl, v, u, trigo = True):
+        if type(u) is float: u = cos(u),sin(u)
+        coef = 1 if trigo else -1
+        return u[0]*v[0]-u[1]*v[1]*coef, u[0]*v[1]+u[1]*v[0]*coef
+    @classmethod
+    def draw(cl,v,p,w=.5,c=0x000000):
+        q = Vector.add(p,v)
+        pygame.draw.line(screen, c, p, q, int(w))
+        u = Vector.setToNorm(v, 1)
+        pts = (
+            Vector.add(Vector.multiply(u,w*1.5),q),
+            Vector.add(Vector.multiply((-(u[0]+u[1]),u[0]-u[1]), w*1.25),q),
+            Vector.add(Vector.multiply((u[1]-u[0],-(u[0]+u[1])), w*1.25),q)
+        )
+        pygame.draw.polygon(screen, c, pts)
+
+class Point(Vector):
+    @classmethod
+    def distance(cl, p, q):
+        return hypot(p[0] - q[0], p[1] - q[1])
+    @classmethod
+    def translate(cl, p, v):
+        return Vector.add(p, v)
+    @classmethod
+    def homothetia(cl, p, n, rel=(0,0)):
+        return Vector.add(Vector.multiply(Vector.subtract(p,rel),n),rel)
+    @classmethod
+    def rotate(cl, p, r:float, rel=(0,0)):
+        p = Vector.subtract(p,rel)
+        c,s = cos(r),sin(r)
+        return Vector.add((c*p[0]+s*p[1],c*p[1]-s*p[0]),rel)
+
+class Droite:
+    @classmethod
+    def Point_Vector(cl, p, v):
+        return Droite(v[1], -v[0], v[0] * p[1] - v[1] * p[0])
+    @classmethod
+    def Point_Point(cl, p, q):
+        return Droite(q[1] - p[1], p[0] - q[0], q[0] * p[1] - q[1] * p[0])
+    def __init__(self, a, b, c):
+        self.a = a
+        self.b = b
+        self.c = c
+    def intersection(self, l):
+        if type(l) is Droite:
+            c,d,e = l.a,l.b,l.c
+        else: c,d,e = l
+        a, b = self.a * d, c * self.b
+        if (a != b):
+            x = (self.b * e - d * self.c) / (a - b)
+            y = (self.a * e - c * self.c) / (b - a)
+            return x, y
+    def PV_intersection(self, P, v):
+        b = self.a * v[0] + self.b * v[1]
+        if (b):
+            a = v[1] * P[0] - v[0] * P[1]
+            return (
+                (a * self.b - self.c * v[0]) / b,
+                (-a * self.a - self.c * v[1]) / b
+            )
+    def closest(self, point):
+        a2, b2, ab = self.a ** 2, self.b ** 2, self.a * self.b
+        return (
+            (b2 * point[0] - ab * point[1] - self.a * self.c) / (a2 + b2),
+            (a2 * point[1] - ab * point[0] - self.b * self.c) / (a2 + b2)
+        )
+    def distance(self, point):
+        return abs(self.a*point[0]+self.b*point[1]+self.c)/(self.a**2+self.b**2)**.5
+    def translate(self, t = (0,0)):
+        self.c -= t[0] * self.a + t[1] * self.b
+    def homothetia(self, k):
+        self.c *= k
+    def draw(self, color=0,w=1):
+        i = (self.intersection((0, -1, 0)),
+            self.intersection((1, 0, 0)),
+            self.intersection((0, -1, resolution[0])),
+            self.intersection((1, 0, -resolution[1]))
+            )
+        i = tuple(j for j in i if j and j[0] >= 0 and j[1] >= 0 and j[0] <= resolution[0] and j[1] <= resolution[1])
+        d=removeDoublons(i)
+        if len(d)==2:
+            pygame.draw.line(screen, color, d[0],d[1], w)
+
+class Circle:
+    def __init__(self, point, radius):
+        self.a = point[0]
+        self.b = point[1]
+        self.c = radius
+    def intersectionLine(self, line: Droite):
+        return mp(polynomial(
+            line.a ** 2 + line.b ** 2,
+            2 * (line.b * line.c - line.a ** 2 * self.b),
+            -(line.a ** 2) * (self.c ** 2 - self.b ** 2 - self.a ** 2) + 2 * line.a * self.a * (line.b + line.c) + line.c ** 2
+        ), lambda y,i: Droite(0, 1, -y).intersection(line))
+    def homothetia(self, k):
+        self.a *= k
+        self.b *= k
+        self.c *= k
+
+class Segment:
+    def __init__(self, p, v):
+        self.p = p
+        self.v = v
+        q = Vector.add(self.p,self.v)
+        self.line = Droite(-v[1],v[0],v[1]*p[0]-v[0]*p[1])
+        self.interval = (sorted((p[0],q[0])),sorted((p[1],q[1])))
+    def translate(self, t:tuple):
+        self.p = Vector.add(self.p, t)
+        self.line.translate(t)
+        self.interval = tuple(tuple(self.interval[i][j]+t[i] for j in (0,1)) for j in (0,1))
+    def getSize(self):
+        return Vector.getNorm(self.v)
+    def getQ(self):
+        return Vector.add(self.p,self.v)
+
+class Force:
+    def __init__(self, p, v):
+        self.p = p
+        self.v = v
+        self.line = Droite(-v[1],v[0],v[1]*p[0]-v[0]*p[1])
+        self.nextPos = Vector.add(p,v)
+
+class Interval:
+    @classmethod
+    def union(cl, i1,i2): # si i1 et i2 sont des intervalles continus
+        if i2[0]<i1[0]: i1,i2 = i2,i1
+        if i1[1]>i2[1]: return i1
+        if i1[1]>i2[0]: return (i1[0],i2[1])
+        return (i1,i2) # intervalle non continu
+    @classmethod
+    def intersects(cl, i1,i2):
+        if type(i1[0]) is int or type(i1[0]) is float:
+            return i1[0]<=i2[1] and i1[1]>=i2[0]
+        else:
+            if Interval.intersects(i1[0],i2[0]) and Interval.intersects(i1[1],i2[1]):
+                return True
+            return False
+
+class Triangle:
+    @classmethod
+    def angleFromSides(cl, a1,a2,o):
+        return acos(min(max((a1**2+a2**2-o**2)/(2*a1*a2),-1),1))
 
 def every(itera, callback=lambda x,i:True):
     for i in range(len(itera)):
@@ -51,7 +262,7 @@ class Block:
         circles = mp(self.pointWalls, lambda w,j: w.radiusApplyWall(r))
         return Block.Radius(lines,circles)
     def draw(self, t:tuple=(0,0), k:float=1):
-        pygame.draw.polygon(screen, 0xff0000, mp(self.points, lambda p,i: Vector.add(p,t)))
+        pygame.draw.polygon(screen, 0xaaaaaa, mp(self.points, lambda p,i: Vector.add(p,t)))
 
 class Wall:
     class Line:
@@ -66,7 +277,6 @@ class Wall:
             self.up = Vector.setToNorm(self.vp,1) #vecteur unitaire
         def radiusApplyWall(self, r:float):
             v = Vector.multiply(self.u,r)
-            print(Vector.multiply(Vector.add(self.p, v),.05), Vector.multiply(Vector.add(self.q, v),.05))
             return Wall.Line(Vector.add(self.p, v), Vector.add(self.q, v))
         def collides(self, segment:Segment):
             intersect = self.line.intersection(segment.line)
@@ -74,7 +284,6 @@ class Wall:
         def bounce(self, segment:Segment, intersect, bounciness=1):
             q = segment.getQ()
             dist = self.line.distance(q)
-            # print('dist',dist)
             npos = Vector.add(q, Vector.multiply(self.u, dist*(1+bounciness)))
             k,l = Vector.multiply(((self.up[0]*segment.v[0]+self.up[1]*segment.v[1]),(self.up[1]*segment.v[0]-self.up[0]*segment.v[1])), self.up[0]**2+self.up[1]**2)
             return (
@@ -84,7 +293,6 @@ class Wall:
                 self.u,
                 k,l
             )
-            # return (npos, Vector.setToNorm(Vector.subtract(npos,intersect), Vector.getNorm(segment.v)*bounciness), self.up, self.vp)
         def draw(self, t:tuple = (0,0), k:float = 1):
             pygame.draw.line(screen, 0, Vector.add(self.p,t), Vector.add(self.q,t), width=1)
         def closeToInterval(self,point, err=.1):
@@ -107,7 +315,6 @@ class Wall:
             u = v[1],-v[0]
             drt = Droite(*v, -v[0]*intersect[0]-v[1]*intersect[1])
             q = segment.getQ()
-            print('error here?')
             dist = drt.distance(q)
             npos = Vector.add(q, Vector.multiply(v, dist*(1+bounciness)))
             k,l = Vector.multiply(((u[0]*segment.v[0]+u[1]*segment.v[1]),(u[1]*segment.v[0]-u[0]*segment.v[1])), u[0]**2+u[1]**2)
@@ -142,15 +349,10 @@ class Wheel:
         walls = self.chassis.mp.getWithinWalls(self)
         walls1 = tuple((w.collides(seg), w) for w in walls)
         walls2 = tuple(w for w in walls1 if w[0] and w[1].closeToInterval(w[0]))
-        # if len(walls2)>1: print(len(walls2))
         if len(walls2)>0:
-            # oldW = None
-            # index = False
-            for w in sorted(walls2, key = lambda w: w[0]):
+            for w in sorted(walls2, key= lambda w: w[0]):
                 data = w[1].bounce(seg,w[0], self.bounciness)
-                # index = True
-                # if oldW != None and oldW:
-                if Vector.isOpposite(Vector.add(self.weight.v, data[1]), data[3]):
+                if Vector.isOpposite(Vector.add(Vector.multiply(self.weight.v,1), data[1]), data[3]):
                     self.vector = Vector.multiply(data[2],data[4])
                     self.pos = Vector.add(Vector.subtract(w[0],Vector.multiply(data[3],-.0005)),self.vector)
                 else:
@@ -162,7 +364,6 @@ class Wheel:
         self.forces.append(force)
     def display(self, t:tuple=(0,0), k:float=1):
         pygame.draw.circle(screen, 0, Vector.add(self.pos,t), self.r, 0xff0000)
-        # Vector.draw(self.vector, mid_screen, 0, 1)
     def drawVec(self, t:tuple=(0,0), k:float=1):
         Vector.draw(Vector.multiply(self.vector,k*5), Vector.add(Vector.multiply(self.pos,k),t),.1*k,0x00ff00)
     def getSegment(self):
@@ -281,15 +482,14 @@ class AttachPoint:
         self.vector = self.wheel.weight.v
         self.nextpos = self.pos
     def update(self, keys):
-        self.wheel.update(*((0,0) if keys[pygame.K_UP] else (keys[pygame.K_LEFT],keys[pygame.K_RIGHT])))
+        self.wheel.update(keys[pygame.K_LEFT],keys[pygame.K_RIGHT])
         v = Vector.subtract(self.wheel.pos, self.pos)
         h = log(Vector.getNorm(v))
         s = log(h)*self.elas if h>1 else 0
         if s < 10:
             self.wheel.vector = Vector.add(self.wheel.vector, Vector.multiply(v, -s))
             self.vector = Vector.multiply(v, s)
-        else: #pour éviter les erreurs
-            pygame.quit()
+        else:
             self.wheel.vector = 0,0
             self.vector = 0,0
             self.wheel.pos = self.pos
@@ -321,11 +521,6 @@ class Chassis:
         for p in self.propellers:
             p.update()
         self.weight.update()
-        # print(type(self.vector))
-        # for i in (0,1):
-        #     print(type(self.propellers[i].vector),'p', i)
-        # for i in range(len(self.aPs)):
-        #     print(type(self.aPs[i].vector),'a', i)
         self.vector = Vector.add(self.vector, self.propellers[0].vector, self.propellers[1].vector, self.weight.vector, *map(lambda a:a.vector, self.aPs))
         self.p = Vector.add(
             Vector.multiply(self.vector, .1),
@@ -359,7 +554,7 @@ class Chassis:
             aP.update(keys)
         self.vector = Vector.multiply(self.vector, .99)
         self.rotateIndex *= .95
-        # render_text('{},{}'.format(*map(round,self.p)))
+        render_text('{},{}'.format(*map(round,self.p)))
     def draw(self):
         ro = sin(self.orientation),cos(self.orientation)
         for p in self.aPs:
@@ -372,13 +567,43 @@ class Chassis:
         Vector.draw(self.vector, Vector.add(self.p,self.mp.t), 1, 0x00ff00)
 
 
-class Polygon:
-    def __init__(self, path):
-        self.path = path
-        self.p = Vector.multiply(Vector.add(*path),1/len(path))
-        self.orientation = 1,0
-        self.weight = Weight(self.p)
-    def update(self):
-        pass
-    def draw(self, c=0xff):
-        pygame.draw.polygon(screen, c, tuple(map(lambda pt: Vector.add(self.p, Vector.rotate(pt, self.orientation)),self.path)))
+
+carte = Carte(
+    tuple(
+        map(
+            lambda x : tuple(map(lambda i: int(i), x.split(','))),
+            '35,3,30,-2,28,2,26,1,25,-4,20,1,15,0,5,3,0,0,-10,-1,-10,8,35,8 40,0,38,0,38,2,40,2'.split(' ')
+        )
+    ),
+    (5,10),
+    mi/50,
+    {}
+)
+
+print(carte.points)
+print(carte.blocks, "blocks")
+
+chassis = Chassis(
+    carte,
+    (0,-100),
+    ((-20,0),(0,-20),(20,0)),
+    20,
+    ((-5,5),(5,5),(-15,5),(15,5),(0,-20))
+)
+
+RUN = True
+
+while RUN:
+    screen.fill(0xffffff)
+    for b in carte.radBlocks[chassis.w_r]:
+        for w in b.walls:
+            w.draw(Vector.subtract(carte.center,carte.relative), 1)
+    carte.update()
+    carte.relative = chassis.p
+    carte.draw()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            RUN = False
+    pygame.display.flip()
+    clock.tick(60)
+pygame.quit()

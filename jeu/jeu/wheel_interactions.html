@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        html,
+        body,
+        svg {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            /*display: flex;*/
+            align-items: center;
+            justify-content: center;
+        }
+
+        svg {
+            height: 100vmin;
+            width: 100vmin;
+        }
+
+        circle {
+            stroke: #000;
+            fill: #fff;
+        }
+
+        line {
+            stroke: #000;
+        }
+
+        #orienration {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <svg></svg>
+    <script>
+        const $ = (s, p = document) => p.querySelector(s);
+        const svg = $('svg');
+        const p2 = Math.PI / 2
+        const keys = {};
+        onmousedown = ({ key }) => keys[key] = true;
+        onmouseup = ({ key }) => keys[key] = false;
+        const mouseposition = { x: innerWidth / 2, y: innerHeight / 2 }
+        onmousemove = ({ x, y }) => { mouseposition.x = x; mouseposition.y = y };
+
+        const addVectors = (...vectors) => vectors[0].map((v, i) => vectors.map(e => e[i]).reduce((s, p) => s + p));
+        function findAround(a, s, S) {
+            const arr = [[]];
+            a.forEach((b, i) => {
+                if (b && a[i % 4])
+                    arr[arr.length - 1].push(i);
+                else arr.push([])
+            })
+            S /= 2
+            const t = [[S, S], [-S, S], [-S, -S], [S, -S]];
+            // console.log(arr.filter(e => e.length))
+            return arr.filter(e => e.length).forEach(e => addVectors(...e.map(i=>t[i])))
+        };
+
+        class Map {
+            constructor(matrix, height = 100, width = 100, l = 10) {
+                this.height = height
+                this.width = width
+                svg.setAttribute('viewBox', `${-width / 2} ${-height / 2} ${width} ${height}`)
+                this.matrix = matrix;
+                this.l = l;
+                this.interactions_with_map = []
+                for (let i of [0, 1])
+                    for (let j of [0, 1])
+                        for (let k of [0, 1])
+                            for (let l of [0, 1])
+                                this.interactions_with_map[i * 8 + j * 4 + k * 2 + l] = [i, j, k, l]
+            }
+            findPointOnMatrix(p) {
+                P2 = p.map(e => (e / this.l) % 1);
+                return this.matrix[P2[1]][P2[0]] * 8
+                    + this.matrix[P2[1]][P2[0] + 1] * 4
+                    + this.matrix[P2[1] + 1][P2[0] + 1] * 2
+                    + this.matrix[P2[1] + 1][P2[0]];
+            }
+        }
+
+        class MotionPoint {
+            constructor(x, y) {
+                this.pos = [x, y]
+                this.traits_v = []
+                this.v = [0, 0]
+            }
+            addTrait(vector) {
+                this.traits_v.push(vector)
+            }
+            update() {
+                this.traits_v.forEach(v => {
+                    this.v[0] += v[0]
+                    this.v[1] += v[1]
+                })
+                this.v[1] += .1
+                this.pos[0] += this.v[0]
+                this.pos[1] += this.v[1]
+                if (this.pos[1] > 50) this.pos[1] = 50
+                this.v = this.v.map(e => e * .95)
+            }
+        }
+
+        class Wheel extends MotionPoint {
+            static enumeration_count = 0
+            constructor(x, y, map) {
+                super(x, y)
+                svg.insertAdjacentHTML('beforeend', `<circle id="wheel${Wheel.enumeration_count}" />`)
+                this.el = $('#wheel' + Wheel.enumeration_count, svg);
+                Wheel.enumeration_count++
+                this.r = 2
+            }
+            checkMapInteraction() {
+
+            }
+            display() {
+                this.el.cx.baseVal.value = this.pos[0]
+                this.el.cy.baseVal.value = this.pos[1]
+            }
+        }
+        const map = Map(new Array(10).fill(0).map(new Array(10).fill(0).map(e => Math.round(Math.random()))));
+        const wheel = new Wheel(0, 0, map);
+        (loop = () => {
+            requestAnimationFrame(loop);
+            wheel.update()
+            wheel.display()
+        })();
+    </script>
+
+</body>
+
+
+
+</html>
